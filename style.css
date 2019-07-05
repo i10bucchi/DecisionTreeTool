@@ -1,0 +1,102 @@
+/* bodyの基本設定 */
+body {
+    font: 10px sans-serif;
+}
+/* 決定木の収束していないノードをつなぐ線に対して適用 */
+.link {
+    fill: none;
+    stroke: #555;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5px;
+}
+/* 決定木の収束しているノードをつなぐ線に対して適用 */
+.link_conv {
+    fill: none;
+    stroke: #00aa00;
+    stroke-width: 2.0px;
+}
+.link_unreliable_conv {
+    fill: none;
+    stroke: #aa0000;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5px;
+}
+/* .axis path, */
+
+/* 目盛りに適用 */
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+/* ポップアップ全体のスタイル設定 */
+.popup {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: .6s;            
+}
+/* visible に設定されているスタイル設定 */
+.popup.is-show {
+    opacity: 1;
+    visibility: visible;
+}
+/* 白背景ポップアップのスタイル設定 */
+.popup-inner {
+    position: absolute;
+    width: 70%;
+    height: 90%;
+    transform: translate(10%, 10%);
+    z-index: 2;
+    background-color: #fff;
+}
+/* ポップアップを閉じるボタンのスタイル設定 */
+.close-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    cursor: center;
+}
+.close-btn i {
+    font-size: 20px;
+    color: #333;
+}
+/* 黒背景ポップアップのスタイル設定 */
+.black-background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .8);
+    z-index: 1;
+    cursor: pointer;
+}
+/* カーソルを合わせた時等のスタイル設定 */
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: auto;
+    height: auto;
+    padding: 5px;
+    font: 12px;
+    background: rgba(100, 100, 100, 0.9);
+    -webkit-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.8);
+    -moz-box-shadow:  0px 0px 20px rgba(0, 0, 0, 0.8);
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.8);
+    visibility: hidden;
+}
+/* ヒストグラムにカーソル合わせた時のスタイル設定 */
+.bar:hover{
+    fill:brown;
+}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jstat/latest/jstat.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="d3_4.css">
+</head>
+
+<body>
+    <!-- ポップアップを配置させて、隠しておく -->
+    <div class="popup" id="js-popup">
+            <div class="popup-inner" id="popup-inner">
+                <div class="close-btn" id="js-close-btn"></div>
+            </div>
+            <div class="black-background" id="js-black-bg"></div>
+    </div>
+    <!-- bin数設定のスライダーの描画 -->
+    <input id="bin_num" type="range" min="0" max="100" value="25" step="1" onmousemove="OnChangeValue();">
+    bin_num: <span id="bin_num_text">25</span>
+    <!-- jsファイルの読み込み -->
+    <script type="text/javascript" src="./tree_plot.js"></script>
+    <script type="text/javascript" src="./poisson.js"></script>
+    <script type="text/javascript" src="./histogram_plot.js"></script>
+</body>

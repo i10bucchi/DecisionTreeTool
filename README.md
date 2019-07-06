@@ -35,7 +35,7 @@ $ git clone https://github.com/i10bucchi/DecisionTreeTool.git
 ### Snypet
 
 ```
-$ python3 tree.py [-p] [-o] [-c] [-d] [-p]
+$ python3 tree.py [-] [-o] [-c] [-d] [-p]
 ```
 
 ### Command
@@ -44,7 +44,7 @@ $ python3 tree.py [-p] [-o] [-c] [-d] [-p]
 - [-h --help]
     コマンドオプションと使用例を表示します.
 
-- [-p --path_csv]
+- [-i --input_csv]
     学習, テストデータとして使用するcsvファイルのパスを渡します. このオプションは必ず指定しなければなりません.
 
 

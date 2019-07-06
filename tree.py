@@ -323,6 +323,7 @@ def main():
     
     # 最低限のパラメータが指定されていない場合は使い方を表示
     if (csv_path == None) or (obj_var == None):
+        print("Error: -i and -o are specified always.")
         usage()
 
     # データ整形して決定木分析

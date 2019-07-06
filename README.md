@@ -35,7 +35,7 @@ $ git clone https://github.com/i10bucchi/DecisionTreeTool.git
 ### Snypet
 
 ```
-$ python3 tree.py [-] [-o] [-c] [-d] [-p]
+$ python3 tree.py [-i] [-o] [-c] [-d]
 ```
 
 ### Command
@@ -57,16 +57,12 @@ $ python3 tree.py [-] [-o] [-c] [-d] [-p]
 - [-d --depth]
     決定木分析の深さを指定します. デフォルトは5となっています.
 
-- [-p --print]
-    分析結果の表示をブラウザで行うかhtmlファイルの出力で行うか指定します. このオプションを指定した場合, htmlファイルを標準出力で出力します. > などを使用して適宜htmlファイルへの流し込みをおこなってください.
-
 ### Example
 
 以下のコマンドはtree.pyがあるディレクトリ内での実行を想定しています.
 
 ```
-$ python3 tree.py -p ./data.csv -o 変数名1 -c 変数名2,変数名3 -d 7
-$ python3 tree.py -p ./data.csv -o 変数名2 -p > result.html
+$ python3 tree.py -p ./data.csv -o 変数名2 -c 変数名2,変数名3 -d 7 > result.html
 ```
 
 ### Data

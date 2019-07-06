@@ -10,17 +10,11 @@ import subprocess
 def usage():
     print("Decision Tree Tool")
     print("")
-    print("Usage: python3 tree.py -p ./user_scan.csv -o scan_num -c a02,a04 -d 7")
+    print("Usage: python3 tree.py -i ./user_scan.csv -o scan_num -c a02,a04 -d 7 > result.html")
     print("-i --input_csv                       - path of csv file")
     print("-o --objective_variable              - the column name that you want to predict")
     print("-c --categolical_variable            - column names that you want to use as one hot vector")
     print("-d --depth                           - the depth as tree parameter. default is 5.")
-    print("-p --print                           - printing html file. do not execute brawser")
-    print("")
-    print("If you want to get html file.")
-    print("    Example: python3 tree.py -p ./user_scan.csv -o scan_num -c a02,a04 -d 7 -p > result.html")
-    print("If you just check result of analyze.")
-    print("    Example: python3 tree.py -p ./user_scan.csv -o scan_num -c a02,a04 -d 7")
     sys.exit(0)
 
 def tree_dump(clf, obj_var, x, y):
@@ -287,7 +281,6 @@ def main():
     obj_var = None
     dummy_vars = None
     depth = 5
-    print_html = False
 
     # パラメータが指定されていない場合は使い方を表示
     if not len(sys.argv[1:]):
@@ -297,8 +290,8 @@ def main():
     try:
         opts, args = getopt.getopt(
             sys.argv[1:],
-            "hi:o:c:d:p",
-            ["help", "input_csv=", "objective_variable=", "dategolical_variable=", "depth=", "print"],
+            "hi:o:c:d:",
+            ["help", "input_csv=", "objective_variable=", "dategolical_variable=", "depth="],
         )
     except getopt.GetoptError as err:
         print(str(err))
@@ -316,8 +309,6 @@ def main():
             dummy_vars = a.split(',')
         elif o in ("-d", "--depth"):
             depth = int(a)
-        elif o in ("-p", "--print"):
-            print_html = True
         else:
             assert False, "Unhandled Option"
     
@@ -330,12 +321,8 @@ def main():
     x, y, X, Y = get_data(csv_path, obj_var, dummy_vars)
     clf = tree_calc(x, y, X, Y, depth)
     tree_dump(clf, obj_var, x, y)
+    make_html()
 
-    # 分析結果の表示
-    if print_html:
-        make_html()
-    else:
-        subprocess.run("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args -allow-file-access-from-files $(pwd)/d3_4.html", shell=True)
 
 CSS_PATH        = './style.css'
 JSON_PATH       = './data/tree_structure.json'

@@ -31,31 +31,17 @@ function make_destribution(tree_structure) {
         }
     }
 
-    // 条件に該当するノード情報から分布に該当する座標点取得する
-    // for (i = 0; i < tree_structure.length; i++) {
-    //     if (tree_structure[i].sigma < (0.6 * tree_structure[0].sigma) && tree_structure[i].n_sample > 0.1 * tree_structure[0].n_sample) {
-    //         data = getGaussianData(tree_structure[i].mu, tree_structure[i].sigma);
-    //         datas.push(
-    //             {
-    //                 'node_number': tree_structure[i].node_number,
-    //                 'mu': tree_structure[i].mu,
-    //                 'sigma': tree_structure[i].sigma,
-    //                 'min_q': d3.min(data, function(d) { return d.q }),
-    //                 'max_q': d3.max(data, function(d) { return d.q }),
-    //                 'max_p': d3.max(data, function(d) { return d.p }),
-    //                 "data": data
-    //             }
-    //         );
-    //     }
-    // }
-
+    // 対象ノードの情報を配列で取得
     datas = getTargetNode(0, datas);
 
+    // グラフを描画するキャンバス情報
     var margin = { top: 20, right: 20, bottom: 30, left: 50 };
     var width = 960 - margin.left - margin.right;
     var height = 500 - margin.top - margin.bottom;
 
     // x座標スケール作成
+    // - .domainはメモリを決定する[min, max]
+    // - .rangeはメモリをキャンバスに収めるにように設定する
     var x = d3.scaleLinear()
         .domain([d3.min(datas, function(d) { return d.min_q }), d3.max(datas, function(d) { return d.max_q })])
         .range([0, width]);
@@ -76,24 +62,31 @@ function make_destribution(tree_structure) {
         .x(function(d) { return x(d.q); })
         .y(function(d) { return y(d.p); });
     
+    // マウスオーバーで表示する情報のクラスを作成
     var tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
+    // キャンバスの作成
     var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
+    // キャンバスへx座標軸を作成
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
+    // キャンバスへy軸座標を作成
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis);
 
+    // 指定されたガウス分布に従うデータを取得
     rootdata = getGaussianData(tree_structure[0].mu, tree_structure[0].sigma);
+
+    // ルートノードのガウス分布最優推定モデルを作成
     svg.append("path")
         .datum(rootdata)
         .attr("class", "line_root")
@@ -102,6 +95,7 @@ function make_destribution(tree_structure) {
         .style('stroke-width', '2.0px')
         .style('stroke', '#ff0000');
 
+    // 収束しているノードのガウス分布最優推定モデルを作成
     for (i = 0; i < datas.length; i++) {
         svg.append("path")
             .datum(datas[i])
@@ -147,17 +141,5 @@ function getGaussianData(mu, sigma) {
     }
     return data;
 }
-
-// function getJson(url) {
-//     var request = new XMLHttpRequest();
-//     request.open('GET', url);
-//     request.responseText = 'json';
-//     request.addEventListener('load', (event) => make_destribution(JSON.parse(request.response)));
-//     request.send();
-// }
-
-// var JSON_FILE_PATH = 'data/tree_structure.json'
-
-// getJson(JSON_FILE_PATH)
 
 make_destribution(jsonData);

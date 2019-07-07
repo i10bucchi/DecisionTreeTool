@@ -57,10 +57,12 @@ function make_destribution(tree_structure) {
 
     // x座標スケール作成
     var x = d3.scaleLinear()
+        .domain([d3.min(datas, function(d) { return d.min_q }), d3.max(datas, function(d) { return d.max_q })])
         .range([0, width]);
 
     // y座標スケール作成
     var y = d3.scaleLinear()
+        .domain([0, d3.max(datas, function(d) { return d.max_p })])
         .range([height, 0]);
 
     // x座標設定
@@ -73,16 +75,14 @@ function make_destribution(tree_structure) {
     var line = d3.line()
         .x(function(d) { return x(d.q); })
         .y(function(d) { return y(d.p); });
+    
+    var tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
     var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // 目盛りの範囲決定[min, max]
-    y.domain([0, d3.max(datas, function(d) { return d.max_p })]);
-    x.domain([d3.min(datas, function(d) { return d.min_q }), d3.max(datas, function(d) { return d.max_q })])
     
     svg.append("g")
         .attr("class", "x axis")
@@ -93,16 +93,46 @@ function make_destribution(tree_structure) {
         .attr("class", "y axis")
         .call(yAxis);
 
+    rootdata = getGaussianData(tree_structure[0].mu, tree_structure[0].sigma);
+    svg.append("path")
+        .datum(rootdata)
+        .attr("class", "line_root")
+        .attr("d", line)
+        .style('fill', 'none')
+        .style('stroke-width', '2.0px')
+        .style('stroke', '#ff0000');
+
     for (i = 0; i < datas.length; i++) {
         svg.append("path")
-            .datum(datas[i].data)
+            .datum(datas[i])
             .attr("class", "line_" + datas[i].node_number)
-            .attr("d", line)
-            .on("click", function(d){ console.log(d); })
+            .attr("d", line(datas[i].data))
             .style('fill', 'none')
             .style('stroke-width', '2.0px')
-            // .on("mouseover", function(elem, svg) { svg.select('.' + elem).style("stroke", "#ffff00"); }("line_"+datas[i].node_number, svg) )
-            .on("mouseout", function(elem, svg){ svg.select('.' + elem).style("stroke", "steelblue"); }("line_"+datas[i].node_number, svg) );
+            .style('stroke', 'steelblue')
+            // .on("click", function(d) {
+            //     d3.select(".circle_" = d.node_number)
+            //         .style('')
+            // })
+            .on("mouseover", function(d){
+                svg.select(".line_" + d.node_number).style("stroke", "#ffff00");
+                tooltip
+                    .style("visibility", "visible")
+                    .html(
+                        "node_number : " + d.node_number + "<br>"
+                        + "mean : " + d.mu.toFixed(2) + "<br>"
+                        + "variance : " + d.sigma.toFixed(2) + "<br>"
+                    );
+            })
+            .on("mousemove", function(d){
+                tooltip
+                    .style("top", (d3.event.pageY - 20) + "px")
+                    .style("left", (d3.event.pageX + 10) + "px");
+            })
+            .on("mouseout", function(d) { 
+                svg.select(".line_" + d.node_number).style("stroke", "steelblue"); 
+                tooltip.style("visibility", "hidden");
+            });
     }
 }
 

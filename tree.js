@@ -82,6 +82,7 @@ function make_tree(tree_structure) {
     var mu_min = d3.min(nodes, function(d) { return d.data.data.mu } );
     node.append("circle")
         .attr("r", 10)
+        .attr("class", function(d) { return "circle_" + d.data.data.node_number })
         .style("fill", function(d) {return "#" + ("000000" + Math.round(255 - ((d.data.data.mu - mu_min) * 255 / (mu_max - mu_min))).toString(16)).slice(-6); }) // ノードの色設定
         .on("click", function(d) {
             // 背景を描画
@@ -107,6 +108,12 @@ function make_tree(tree_structure) {
         })
 
     // adds the text to the node
+    node.append("text")
+        .attr("dy", ".35em")
+        .attr("y", -35)
+        .style("text-anchor", "end")
+        .text(function(d) { return 'node_number: ' + d.data.data.node_number });
+
     node.append("text")
         .attr("dy", ".35em")
         .attr("y", function(d) { return d.children ? -20 : 0; })

@@ -7,6 +7,9 @@ import pandas as pd
 from sklearn import tree
 import subprocess
 
+# ----- ヒストグラムのデータを取得する自作メソッド ----- #
+from make_histdata import get_histdata
+
 def usage():
     print("Decision Tree Tool")
     print("")
@@ -153,6 +156,9 @@ def tree_dump(clf, obj_var, x, y):
         }
         for node in range(n_node)
     ]
+    
+    # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
+    get_histdata(tree_structure_dict)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
@@ -197,6 +203,12 @@ def get_data(csv_path, obj_var, dummy_vars):
     y = df_train[obj_var]
     X = df_test.drop(obj_var, axis=1)
     Y = df_test[obj_var]
+
+    # user_id 列がfloatに変換できないというエラーが出た
+    # 応急処置としてuser_id列を削除している
+    x = x.drop(columns=["user_id"])
+    X = X.drop(columns=["user_id"])
+
 
     # 表示
     return x, y, X, Y

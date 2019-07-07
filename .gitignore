@@ -2,3 +2,5 @@ data/
 *.csv
 result.html
 .DS_Store
+.vscode/
+__pycache__/

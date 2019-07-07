@@ -105,7 +105,7 @@ function make_tree(tree_structure) {
             // 背景を描画
             popup_func()
             // ヒストグラム描画用関数の呼び出し
-            plot_histogram(d.ancestors())
+            plot_histogram(d)
         }) //以下マウスオーバーのイベント設定
         .on("mouseover", function(d){
             var data = d.data.data

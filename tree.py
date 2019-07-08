@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn import tree
 import subprocess
+from const import *
 
 # ----- ヒストグラムのデータを取得する自作メソッド ----- #
 from make_histdata import get_histdata
@@ -156,9 +157,8 @@ def tree_dump(clf, obj_var, x, y):
         }
         for node in range(n_node)
     ]
-    
     # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
-    get_histdata(tree_structure_dict)
+    get_histdata(tree_structure_dict, x, y, obj_var)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
@@ -203,12 +203,6 @@ def get_data(csv_path, obj_var, dummy_vars):
     y = df_train[obj_var]
     X = df_test.drop(obj_var, axis=1)
     Y = df_test[obj_var]
-
-    # user_id 列がfloatに変換できないというエラーが出た
-    # 応急処置としてuser_id列を削除している
-    x = x.drop(columns=["user_id"])
-    X = X.drop(columns=["user_id"])
-
 
     # 表示
     return x, y, X, Y
@@ -289,10 +283,11 @@ def make_html():
     print('</body>')
 
 def main():
-    csv_path = None
-    obj_var = None
-    dummy_vars = None
-    depth = 5
+
+    global csv_path
+    global obj_var
+    global dummy_vars
+    global depth
 
     # パラメータが指定されていない場合は使い方を表示
     if not len(sys.argv[1:]):
@@ -334,12 +329,5 @@ def main():
     clf = tree_calc(x, y, X, Y, depth)
     tree_dump(clf, obj_var, x, y)
     make_html()
-
-
-CSS_PATH        = './style.css'
-JSON_PATH       = './data/tree_structure.json'
-TREE_JS_PATH    = './tree.js'
-HIST_JS_PATH    = './histgram.js'
-FIT_JS_PATH     = './cov_fit.js'
 
 main()

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as numpy
-def get_histdata(tree_structure_dict):
+from const import *
+def get_histdata(tree_structure_dict, x, y, obj_var):
     """
     abst:
         ヒストグラムを描画するためのデータを出力
@@ -58,9 +59,10 @@ def get_histdata(tree_structure_dict):
             }
         ] + get_feat_to_root(tree_structure_dict[node_number]["parent"])
     
-    # 各ユーザの属性・スキャン数が格納されたcsvファイルを読み込み
-    df = pd.read_csv("./data/user_scan.csv", header=0, index_col=0)
-    df = df[df["scan_num"] < 100]
+
+    df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
+    
+    df = df[df[obj_var] < 100]
     # BIN数の設定
     NUM_BINS = 25
     

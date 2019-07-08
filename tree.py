@@ -7,6 +7,9 @@ import pandas as pd
 from sklearn import tree
 import subprocess
 
+# ----- ヒストグラムのデータを取得する自作メソッド ----- #
+from make_histdata import get_histdata
+
 def usage():
     print("Decision Tree Tool")
     print("")
@@ -153,6 +156,8 @@ def tree_dump(clf, obj_var, x, y):
         }
         for node in range(n_node)
     ]
+    # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
+    get_histdata(tree_structure_dict, x, y, obj_var)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
@@ -277,6 +282,7 @@ def make_html():
     print('</body>')
 
 def main():
+
     csv_path = None
     obj_var = None
     dummy_vars = None
@@ -322,7 +328,6 @@ def main():
     clf = tree_calc(x, y, X, Y, depth)
     tree_dump(clf, obj_var, x, y)
     make_html()
-
 
 CSS_PATH        = './style.css'
 JSON_PATH       = './data/tree_structure.json'

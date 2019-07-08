@@ -105,7 +105,7 @@ function make_tree(tree_structure) {
             // 背景を描画
             popup_func()
             // ヒストグラム描画用関数の呼び出し
-            plot_histogram(d.ancestors())
+            plot_histogram(d)
         }) //以下マウスオーバーのイベント設定
         .on("mouseover", function(d){
             var data = d.data.data
@@ -113,7 +113,8 @@ function make_tree(tree_structure) {
                 .style("visibility", "visible")
                 .html("sample : " + data.n_sample + "<br>sample_l : " + data.n_sample_div[0]+
                 "<br>sample_r : " + data.n_sample_div[1]+
-                "<br>mu : " + data.mu);
+                "<br>mu : " + data.mu +
+                "<br>var :" + data.sigma);
         })
         .on("mousemove", function(d){
             tooltip

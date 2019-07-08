@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as numpy
-from const import *
 def get_histdata(tree_structure_dict, x, y, obj_var):
     """
     abst:
@@ -61,8 +60,8 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
     
 
     df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
-    
-    df = df[df[obj_var] < 100]
+    sigma = tree_structure_dict[0]["sigma"]
+    df = df[df[obj_var] < (sigma * 4)]
     # BIN数の設定
     NUM_BINS = 25
     

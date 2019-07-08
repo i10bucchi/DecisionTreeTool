@@ -113,7 +113,8 @@ function make_tree(tree_structure) {
                 .style("visibility", "visible")
                 .html("sample : " + data.n_sample + "<br>sample_l : " + data.n_sample_div[0]+
                 "<br>sample_r : " + data.n_sample_div[1]+
-                "<br>mu : " + data.mu);
+                "<br>mu : " + data.mu +
+                "<br>var :" + data.sigma);
         })
         .on("mousemove", function(d){
             tooltip

@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from sklearn import tree
 import subprocess
-from const import *
 
 # ----- ヒストグラムのデータを取得する自作メソッド ----- #
 from make_histdata import get_histdata
@@ -284,10 +283,10 @@ def make_html():
 
 def main():
 
-    global csv_path
-    global obj_var
-    global dummy_vars
-    global depth
+    csv_path = None
+    obj_var = None
+    dummy_vars = None
+    depth = 5
 
     # パラメータが指定されていない場合は使い方を表示
     if not len(sys.argv[1:]):
@@ -329,5 +328,11 @@ def main():
     clf = tree_calc(x, y, X, Y, depth)
     tree_dump(clf, obj_var, x, y)
     make_html()
+
+CSS_PATH        = './style.css'
+JSON_PATH       = './data/tree_structure.json'
+TREE_JS_PATH    = './tree.js'
+HIST_JS_PATH    = './histgram.js'
+FIT_JS_PATH     = './cov_fit.js'
 
 main()

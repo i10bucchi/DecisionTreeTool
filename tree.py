@@ -157,7 +157,7 @@ def tree_dump(clf, obj_var, x, y):
         for node in range(n_node)
     ]
     # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
-    get_histdata(tree_structure_dict, x, y, obj_var)
+    # get_histdata(tree_structure_dict, x, y, obj_var)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
@@ -231,7 +231,6 @@ def tree_calc(x, y, X, Y, opts):
         random_state=opts["random_state"],
         max_leaf_nodes=opts["max_leaf_nodes"],
         min_impurity_decrease=opts["min_impurity_decrease"],
-        min_impurity_split=opts["min_impurity_split"],
         presort=opts["presort"]
     )
     clf = clf.fit(x, y)
@@ -316,7 +315,6 @@ def main():
         "random_state": None,
         "max_leaf_nodes": None,
         "min_impurity_decrease": 0.,
-        "min_impurity_split": 1e-7,
         "presort": False
     }
 
@@ -346,7 +344,6 @@ def main():
                 "random_state=",
                 "max_leaf_nodes=",
                 "min_impurity_decrease=",
-                "min_impurity_split=",
                 "presort="
             ],
         )
@@ -384,8 +381,6 @@ def main():
             skltree_opts_dict["max_leaf_nodes"] = int(a)
         elif o in ("--min_impurity_decrease"):
             skltree_opts_dict["min_impurity_decrease"] = float(a)
-        elif o in ("--min_impurity_split"):
-            skltree_opts_dict["min_impurity_split"] = float(a)
         elif o in ("--presort"):
             skltree_opts_dict["presort"] = bool(a)
         else:

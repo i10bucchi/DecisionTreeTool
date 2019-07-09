@@ -58,10 +58,41 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
             }
         ] + get_feat_to_root(tree_structure_dict[node_number]["parent"])
     
+    def replace_outlier(series, bias=1.5):
+        """
+        abst:
+            外れ値(最大値)を除くメソッド
+        input:
+            series: 各データの目的変数の値が格納されたpandas.Series
+        outpu:
+            replaced_series: 外れ値が取り除かれたSeries
+        """
+        # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
+        # 外れ値を除く処理を行わない
+        if (series.shape[0] < 5):
+            return series
+
+        # 四分位数
+        q1 = series.quantile(.25)
+        q3 = series.quantile(.75)
+        iqr = q3 - q1
+        # 外れ値の基準点
+        min_outlier = q1 - (iqr * bias)
+        max_outlier = q3 + (iqr * bias)
+        
+        # 外れ値の除去
+        replaced_series = series[(min_outlier <= series) & (series <= max_outlier)]
+        # print("bef:{}, aft:{}".format(series.shape[0], replaced_series.shape[0]))
+        # print(series.describe())
+        # print(replaced_series.describe())
+        return replaced_series
+        
 
     df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
+
+
     sigma = tree_structure_dict[0]["sigma"]
-    df = df[df[obj_var] < (sigma * 4)]
+    #df = df[df[obj_var] < (sigma * 4)]
     # BIN数の設定
     NUM_BINS = 25
     
@@ -69,21 +100,25 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
         # 各ノードのヒストグラムを書くための条件を取得
         feats = get_feat_to_root(node_info["node_number"])
         # 大元のスキャンデータを読み込み
-        tmp = df
-        for feat in feats:
+        tmp = df.copy()
+        for feat in reversed(feats):
             # もし、ノードが左側だった場合、条件に当てはまるものを抽出
             if (feat["LorR"] == "LEFT"):
                 tmp = tmp[tmp[feat["feature"]] <= feat["threshold"]]
             # もし、ノードが右側だった場合、条件に当てはまるもの以外を抽出
             elif (feat["LorR"] == "RIGHT"):
                 tmp = tmp[~(tmp[feat["feature"]] <= feat["threshold"])]
+
         # mapメソッドで使う関数
         def get_left(x):
             return x.left
         def get_right(x):
             return x.right
+        # cutメソッドを適用する前に外れ値がある場合は除く。
+        series = replace_outlier(tmp[obj_var])
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
-        cutting_bins = pd.cut(tmp.scan_num.values, NUM_BINS).value_counts().reset_index()
+        # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
+        cutting_bins = pd.cut(series.values, NUM_BINS).value_counts().reset_index()
         cutting_bins["x0"] = cutting_bins["index"].map(get_left)
         cutting_bins["x1"] = cutting_bins["index"].map(get_right)
         cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})

@@ -1,29 +1,12 @@
 
 // 決定木描画用関数
 function make_tree(tree_structure) {
-    var targetDatas = [];
-    var data;
-    // 信頼性を測るサンプル数閾値
-    var reliable_th = 0.1 * tree_structure[0].n_sample;
-    // 信頼性のあるノードを親ノードにもつノードのみ抽出する(ルートも含む)
-    for (var i = 0; i < tree_structure.length; i++) {
-        data = tree_structure[i];
-        if (i == 0) {
-            targetDatas.push(data);
-        }
-        else{
-            if (tree_structure[data.parent].n_sample > reliable_th) {
-                targetDatas.push(data);
-            }
-        }
-    }
-
     // フラットデータをヒエラルキーデータへ変換
     var stratify = d3.stratify()
         .id(function(d) { return d.node_number; })
         .parentId(function(d) { return d.parent; });
     
-    var tree_structure_stratifed = stratify(targetDatas);
+    var tree_structure_stratifed = stratify(tree_structure);
     
     // 各要素のnameにidを代入
     tree_structure_stratifed.each(function(d) { d.name = d.id; });
@@ -66,14 +49,8 @@ function make_tree(tree_structure) {
         .enter().append("path")
         .attr("class", function(d) {
             if (d.data.data.sigma < (0.6 * tree_structure[0].sigma)) {
-                if (d.data.data.n_sample > reliable_th) {
-                    // 信頼性のある収束済みリンク
-                    return "link_conv";
-                }
-                else {
-                    // 信頼性のない収束済みリンク
-                    return "link_unreliable_conv"
-                }
+                // 信頼性のある収束済みリンク
+                return "link_conv";
             }
             else {
                 // 収束していないリンク

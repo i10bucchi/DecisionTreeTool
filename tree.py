@@ -156,8 +156,9 @@ def tree_dump(clf, obj_var, x, y):
         }
         for node in range(n_node)
     ]
+    
     # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
-    # get_histdata(tree_structure_dict, x, y, obj_var)
+    get_histdata(tree_structure_dict, x, y, obj_var)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)

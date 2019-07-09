@@ -206,7 +206,7 @@ def get_data(csv_path, obj_var, dummy_vars):
     # 表示
     return x, y, X, Y
 
-def tree_calc(x, y, X, Y, depth):
+def tree_calc(x, y, X, Y, opts):
     '''
     abst:
         決定木分析を行う
@@ -215,12 +215,25 @@ def tree_calc(x, y, X, Y, depth):
         y: 学習データ目的変数
         X: テストデータ説明変数
         Y: テストデータ目的変数
-        depth: 決定木の深さ
+        opts: sklearnの決定木に対するオプション
     output:
         clf: scikit-learnの決定木の構造
     '''
 
-    clf = tree.DecisionTreeRegressor(random_state=0, max_depth=depth)
+    clf = tree.DecisionTreeRegressor(
+        criterion=opts["criterion"],
+        splitter=opts["splitter"],
+        max_depth=opts["max_depth"],
+        min_samples_split=opts["min_samples_split"],
+        min_samples_leaf=opts["min_samples_leaf"],
+        min_weight_fraction_leaf=opts["min_weight_fraction_leaf"],
+        max_features=opts["max_features"],
+        random_state=opts["random_state"],
+        max_leaf_nodes=opts["max_leaf_nodes"],
+        min_impurity_decrease=opts["min_impurity_decrease"],
+        min_impurity_split=opts["min_impurity_split"],
+        presort=opts["presort"]
+    )
     clf = clf.fit(x, y)
     y_ = clf.predict(x)
     y_pred = clf.predict(X)
@@ -285,11 +298,27 @@ def get_html():
     return html
 
 def main():
-
-    csv_path = None
-    obj_var = None
-    dummy_vars = None
-    depth = 5
+    # Decision Tree Tool Option
+    tool_opts_dict = {
+        "csv_path": None,
+        "obj_var": None,
+        "dummy_vars": None,
+    }
+    # sklearn.tree.DesisionTreeRegressor Options
+    skltree_opts_dict = {
+        "criterion": "mse",
+        "splitter": "best",
+        "max_depth": None,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "min_weight_fraction_leaf": 0.,
+        "max_features": None,
+        "random_state": None,
+        "max_leaf_nodes": None,
+        "min_impurity_decrease": 0.,
+        "min_impurity_split": 1e-7,
+        "presort": False
+    }
 
     # パラメータが指定されていない場合は使い方を表示
     if not len(sys.argv[1:]):
@@ -299,8 +328,27 @@ def main():
     try:
         opts, args = getopt.getopt(
             sys.argv[1:],
-            "hi:o:c:d:",
-            ["help", "input_csv=", "objective_variable=", "dategolical_variable=", "depth="],
+            "hi:o:c:",
+            [
+                # Decision Tree Tool Options
+                "help",
+                "input_csv=",
+                "objective_variable=",
+                "dategolical_variable=",
+                # sklearn.tree.DesisionTreeRegressor Options
+                "criterion=",
+                "splitter=",
+                "max_depth=",
+                "min_samples_split=",
+                "min_samples_leaf=",
+                "min_weight_fraction_leaf=",
+                "max_features=",
+                "random_state=",
+                "max_leaf_nodes=",
+                "min_impurity_decrease=",
+                "min_impurity_split=",
+                "presort="
+            ],
         )
     except getopt.GetoptError as err:
         print(str(err))
@@ -311,25 +359,47 @@ def main():
         if o in ("-h", "--help"):
             usage()
         elif o in ("-i", "--input_csv"): 
-            csv_path = a
+            tool_opts_dict["csv_path"] = a
         elif o in ("-o", "--objective_variable"):
-            obj_var = a
+            tool_opts_dict["obj_var"] = a
         elif o in ("-c", "--categolical_variable"):
-            dummy_vars = a.split(',')
-        elif o in ("-d", "--depth"):
-            depth = int(a)
+            tool_opts_dict["dummy_vars"] = a.split(',')
+        elif o in ("--criterion"):
+            skltree_opts_dict["criterion"] = a
+        elif o in ("--splitter"):
+            skltree_opts_dict["splitter"] = a
+        elif o in ("--max_depth"):
+            skltree_opts_dict["max_depth"] = int(a)
+        elif o in ("--min_samples_split"):
+            skltree_opts_dict["min_samples_split"] = int(a)
+        elif o in ("--min_samples_leaf"):
+            skltree_opts_dict["min_samples_leaf"] = int(a) # floatも取り得る
+        elif o in ("--min_weight_fraction_leaf"):
+            skltree_opts_dict["min_weight_fraction_leaf"] = float(a)
+        elif o in ("--max_features"):
+            skltree_opts_dict["max_features"] = a # int, float, stringを取り得る
+        elif o in ("--random_state"):
+            skltree_opts_dict["random_state"] = int(a)
+        elif o in ("--max_leaf_nodes"):
+            skltree_opts_dict["max_leaf_nodes"] = int(a)
+        elif o in ("--min_impurity_decrease"):
+            skltree_opts_dict["min_impurity_decrease"] = float(a)
+        elif o in ("--min_impurity_split"):
+            skltree_opts_dict["min_impurity_split"] = float(a)
+        elif o in ("--presort"):
+            skltree_opts_dict["presort"] = bool(a)
         else:
             assert False, "Unhandled Option"
     
     # 最低限のパラメータが指定されていない場合は使い方を表示
-    if (csv_path == None) or (obj_var == None):
+    if (tool_opts_dict["csv_path"] == None) or (tool_opts_dict["obj_var"] == None):
         print("Error: -i and -o are specified always.")
         usage()
 
     # データ整形して決定木分析
-    x, y, X, Y = get_data(csv_path, obj_var, dummy_vars)
-    clf = tree_calc(x, y, X, Y, depth)
-    tree_dump(clf, obj_var, x, y)
+    x, y, X, Y = get_data(tool_opts_dict["csv_path"], tool_opts_dict["obj_var"], tool_opts_dict["dummy_vars"])
+    clf = tree_calc(x, y, X, Y, skltree_opts_dict)
+    tree_dump(clf, tool_opts_dict["obj_var"], x, y)
     html = get_html()
     print(html)
 

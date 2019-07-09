@@ -38,7 +38,7 @@ $ mkdir ./DecisionTreeTool/data
 ### Snypet
 
 ```
-$ python3 tree.py [-i] [-o] [-c] [-d]
+$ python3 tree.py [-i] [-o] [-c] [--criterion] [--splitter] [--max_depth] [--min_samples_split] [--min_samples_leaf] [--min_weight_fraction_leaf] [--max_features] [--random_state] [--max_leaf_nodes] [--min_impurity_decrease] [--presort]
 ```
 
 ### Command
@@ -56,15 +56,14 @@ $ python3 tree.py [-i] [-o] [-c] [-d]
 - [-c --categolical_variable]
     ダミー変数化を行いたい変数を指定します. 指定されない場合は自動でダミー変数化されます. 詳しくはpandas.get_dummyの使用を確認ください. 複数の変数を指定する場合は","を使用して繋げてください. csvファイルのカラム名と同じものを指定する必要があります.
 
-- [-d --depth]
-    決定木分析の深さを指定します. デフォルトは5となっています.
+他, [ --option_name ]の形で[sklearn.tree.DecisionTreeRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html)のオプションを指定できます. 
 
 ### Example
 
 以下のコマンドはtree.pyがあるディレクトリ内での実行を想定しています.
 
 ```
-$ python3 tree.py -p ./data.csv -o 変数名2 -c 変数名2,変数名3 -d 7 > result.html
+$ python3 tree.py -p ./data.csv -o 変数名2 -c 変数名2,変数名3 --max_depth=7 > result.html
 ```
 
 ### Data
@@ -98,11 +97,7 @@ _data.csv_
 
 - ノードをつなぐ線(リンク)は色によって以下の意味を持ちます.
     - 灰色: 未収束
-    - 緑色: 収束しており, その結果が信頼できる
-    - 赤色: 収束しているが, その結果が信頼できない
-        - 赤のリンクを持つノードのそれ以降のノード表示は行われません.
-
-
+    - 緑色: 収束(分割結果がルートノードの60%の分散を持つことが収束したと判断される基準になります)
 
 #### 最優推定モデル
 

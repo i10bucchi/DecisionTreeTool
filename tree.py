@@ -284,9 +284,6 @@ def get_html():
     html += '            </div>\n'
     html += '            <div class="black-background" id="js-black-bg"></div>\n'
     html += '    </div>\n'
-    html += '    <!-- bin数設定のスライダーの描画 -->\n'
-    html += '    <input id="bin_num" type="range" min="0" max="100" value="25" step="1" onmousemove="OnChangeValue();">\n'
-    html += '    bin_num: <span id="bin_num_text">25</span>\n'
     html += '    <!-- jsファイルの読み込み -->\n'
     html += '    <script>var jsonData = {}</script>'.format(json)
     html += '    <script>{}</script>\n'.format(tree_plot_js)

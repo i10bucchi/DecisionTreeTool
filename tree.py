@@ -156,8 +156,10 @@ def tree_dump(clf, obj_var, x, y):
         }
         for node in range(n_node)
     ]
+    
     # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
     get_histdata(tree_structure_dict, x, y, obj_var)
+
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
     f.close()
@@ -205,7 +207,7 @@ def get_data(csv_path, obj_var, dummy_vars):
     # 表示
     return x, y, X, Y
 
-def tree_calc(x, y, X, Y, depth):
+def tree_calc(x, y, X, Y, opts):
     '''
     abst:
         決定木分析を行う
@@ -214,12 +216,24 @@ def tree_calc(x, y, X, Y, depth):
         y: 学習データ目的変数
         X: テストデータ説明変数
         Y: テストデータ目的変数
-        depth: 決定木の深さ
+        opts: sklearnの決定木に対するオプション
     output:
         clf: scikit-learnの決定木の構造
     '''
 
-    clf = tree.DecisionTreeRegressor(random_state=0, max_depth=depth)
+    clf = tree.DecisionTreeRegressor(
+        criterion=opts["criterion"],
+        splitter=opts["splitter"],
+        max_depth=opts["max_depth"],
+        min_samples_split=opts["min_samples_split"],
+        min_samples_leaf=opts["min_samples_leaf"],
+        min_weight_fraction_leaf=opts["min_weight_fraction_leaf"],
+        max_features=opts["max_features"],
+        random_state=opts["random_state"],
+        max_leaf_nodes=opts["max_leaf_nodes"],
+        min_impurity_decrease=opts["min_impurity_decrease"],
+        presort=opts["presort"]
+    )
     clf = clf.fit(x, y)
     y_ = clf.predict(x)
     y_pred = clf.predict(X)
@@ -230,12 +244,13 @@ def tree_calc(x, y, X, Y, depth):
 
     return clf
 
-def make_html():
+def get_html():
     '''
     abst:
-        分析結果を表示するHTMLをプリント
+        分析結果を表示するHTMLを作成
     input:
     output:
+        html: 分析結果を表示するhtml
     '''
     f = open(JSON_PATH, "r")
     json = f.read()
@@ -253,39 +268,53 @@ def make_html():
     histogram_plot_js = f.read()
     f.close()
 
-    print('<!DOCTYPE html>')
-    print('<head>')
-    print('    <meta charset="utf-8">')
-    print('    <script src="http://d3js.org/d3.v4.min.js"></script>')
-    print('    <script src="https://cdn.jsdelivr.net/jstat/latest/jstat.min.js"></script>')
-    print('    <!-- <link rel="stylesheet" type="text/css" href="d3_4.css"> -->')
-    print('    <style>{}</style>'.format(style))
-    print('</head>')
-    print('')
-    print('<body>')
-    print('    <!-- ポップアップを配置させて、隠しておく -->')
-    print('    <div class="popup" id="js-popup">')
-    print('            <div class="popup-inner" id="popup-inner">')
-    print('                <div class="close-btn" id="js-close-btn"></div>')
-    print('            </div>')
-    print('            <div class="black-background" id="js-black-bg"></div>')
-    print('    </div>')
-    print('    <!-- bin数設定のスライダーの描画 -->')
-    print('    <input id="bin_num" type="range" min="0" max="100" value="25" step="1" onmousemove="OnChangeValue();">')
-    print('    bin_num: <span id="bin_num_text">25</span>')
-    print('    <!-- jsファイルの読み込み -->')
-    print('    <script>var jsonData = {}</script>'.format(json))
-    print('    <script>{}</script>'.format(tree_plot_js))
-    print('    <script>{}</script>'.format(poisson_js))
-    print('    <script>{}</script>'.format(histogram_plot_js))
-    print('</body>')
+    html = '<!DOCTYPE html>\n'
+    html += '<head>\n'
+    html += '    <meta charset="utf-8">\n'
+    html += '    <script src="http://d3js.org/d3.v4.min.js"></script>\n'
+    html += '    <script src="https://cdn.jsdelivr.net/jstat/latest/jstat.min.js"></script>\n'
+    html += '    <!-- <link rel="stylesheet" type="text/css" href="d3_4.css"> -->\n'
+    html += '    <style>{}</style>'.format(style)
+    html += '</head>\n'
+    html += '\n'
+    html += '<body>\n'
+    html += '    <!-- ポップアップを配置させて、隠しておく -->\n'
+    html += '    <div class="popup" id="js-popup">\n'
+    html += '            <div class="popup-inner" id="popup-inner">\n'
+    html += '                <div class="close-btn" id="js-close-btn"></div>\n'
+    html += '            </div>\n'
+    html += '            <div class="black-background" id="js-black-bg"></div>\n'
+    html += '    </div>\n'
+    html += '    <!-- jsファイルの読み込み -->\n'
+    html += '    <script>var jsonData = {}</script>'.format(json)
+    html += '    <script>{}</script>\n'.format(tree_plot_js)
+    html += '    <script>{}</script>\n'.format(poisson_js)
+    html += '    <script>{}</script>\n'.format(histogram_plot_js)
+    html += '</body>\n'
+    
+    return html
 
 def main():
-
-    csv_path = None
-    obj_var = None
-    dummy_vars = None
-    depth = 5
+    # Decision Tree Tool Option
+    tool_opts_dict = {
+        "csv_path": None,
+        "obj_var": None,
+        "dummy_vars": None,
+    }
+    # sklearn.tree.DesisionTreeRegressor Options
+    skltree_opts_dict = {
+        "criterion": "mse",
+        "splitter": "best",
+        "max_depth": None,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "min_weight_fraction_leaf": 0.,
+        "max_features": None,
+        "random_state": None,
+        "max_leaf_nodes": None,
+        "min_impurity_decrease": 0.,
+        "presort": False
+    }
 
     # パラメータが指定されていない場合は使い方を表示
     if not len(sys.argv[1:]):
@@ -295,8 +324,26 @@ def main():
     try:
         opts, args = getopt.getopt(
             sys.argv[1:],
-            "hi:o:c:d:",
-            ["help", "input_csv=", "objective_variable=", "dategolical_variable=", "depth="],
+            "hi:o:c:",
+            [
+                # Decision Tree Tool Options
+                "help",
+                "input_csv=",
+                "objective_variable=",
+                "dategolical_variable=",
+                # sklearn.tree.DesisionTreeRegressor Options
+                "criterion=",
+                "splitter=",
+                "max_depth=",
+                "min_samples_split=",
+                "min_samples_leaf=",
+                "min_weight_fraction_leaf=",
+                "max_features=",
+                "random_state=",
+                "max_leaf_nodes=",
+                "min_impurity_decrease=",
+                "presort="
+            ],
         )
     except getopt.GetoptError as err:
         print(str(err))
@@ -307,26 +354,47 @@ def main():
         if o in ("-h", "--help"):
             usage()
         elif o in ("-i", "--input_csv"): 
-            csv_path = a
+            tool_opts_dict["csv_path"] = a
         elif o in ("-o", "--objective_variable"):
-            obj_var = a
+            tool_opts_dict["obj_var"] = a
         elif o in ("-c", "--categolical_variable"):
-            dummy_vars = a.split(',')
-        elif o in ("-d", "--depth"):
-            depth = int(a)
+            tool_opts_dict["dummy_vars"] = a.split(',')
+        elif o in ("--criterion"):
+            skltree_opts_dict["criterion"] = a
+        elif o in ("--splitter"):
+            skltree_opts_dict["splitter"] = a
+        elif o in ("--max_depth"):
+            skltree_opts_dict["max_depth"] = int(a)
+        elif o in ("--min_samples_split"):
+            skltree_opts_dict["min_samples_split"] = int(a)
+        elif o in ("--min_samples_leaf"):
+            skltree_opts_dict["min_samples_leaf"] = int(a) # floatも取り得る
+        elif o in ("--min_weight_fraction_leaf"):
+            skltree_opts_dict["min_weight_fraction_leaf"] = float(a)
+        elif o in ("--max_features"):
+            skltree_opts_dict["max_features"] = a # int, float, stringを取り得る
+        elif o in ("--random_state"):
+            skltree_opts_dict["random_state"] = int(a)
+        elif o in ("--max_leaf_nodes"):
+            skltree_opts_dict["max_leaf_nodes"] = int(a)
+        elif o in ("--min_impurity_decrease"):
+            skltree_opts_dict["min_impurity_decrease"] = float(a)
+        elif o in ("--presort"):
+            skltree_opts_dict["presort"] = bool(a)
         else:
             assert False, "Unhandled Option"
     
     # 最低限のパラメータが指定されていない場合は使い方を表示
-    if (csv_path == None) or (obj_var == None):
+    if (tool_opts_dict["csv_path"] == None) or (tool_opts_dict["obj_var"] == None):
         print("Error: -i and -o are specified always.")
         usage()
 
     # データ整形して決定木分析
-    x, y, X, Y = get_data(csv_path, obj_var, dummy_vars)
-    clf = tree_calc(x, y, X, Y, depth)
-    tree_dump(clf, obj_var, x, y)
-    make_html()
+    x, y, X, Y = get_data(tool_opts_dict["csv_path"], tool_opts_dict["obj_var"], tool_opts_dict["dummy_vars"])
+    clf = tree_calc(x, y, X, Y, skltree_opts_dict)
+    tree_dump(clf, tool_opts_dict["obj_var"], x, y)
+    html = get_html()
+    print(html)
 
 CSS_PATH        = './style.css'
 JSON_PATH       = './data/tree_structure.json'

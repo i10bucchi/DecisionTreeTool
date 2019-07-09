@@ -15,12 +15,6 @@ body {
     stroke: #00aa00;
     stroke-width: 2.0px;
 }
-.link_unreliable_conv {
-    fill: none;
-    stroke: #aa0000;
-    stroke-opacity: 0.4;
-    stroke-width: 1.5px;
-}
 /* .axis path, */
 
 /* 目盛りに適用 */

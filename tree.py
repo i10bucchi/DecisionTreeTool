@@ -231,12 +231,13 @@ def tree_calc(x, y, X, Y, depth):
 
     return clf
 
-def make_html():
+def get_html():
     '''
     abst:
-        分析結果を表示するHTMLをプリント
+        分析結果を表示するHTMLを作成
     input:
     output:
+        html: 分析結果を表示するhtml
     '''
     f = open(JSON_PATH, "r")
     json = f.read()
@@ -254,32 +255,34 @@ def make_html():
     histogram_plot_js = f.read()
     f.close()
 
-    print('<!DOCTYPE html>')
-    print('<head>')
-    print('    <meta charset="utf-8">')
-    print('    <script src="http://d3js.org/d3.v4.min.js"></script>')
-    print('    <script src="https://cdn.jsdelivr.net/jstat/latest/jstat.min.js"></script>')
-    print('    <!-- <link rel="stylesheet" type="text/css" href="d3_4.css"> -->')
-    print('    <style>{}</style>'.format(style))
-    print('</head>')
-    print('')
-    print('<body>')
-    print('    <!-- ポップアップを配置させて、隠しておく -->')
-    print('    <div class="popup" id="js-popup">')
-    print('            <div class="popup-inner" id="popup-inner">')
-    print('                <div class="close-btn" id="js-close-btn"></div>')
-    print('            </div>')
-    print('            <div class="black-background" id="js-black-bg"></div>')
-    print('    </div>')
-    print('    <!-- bin数設定のスライダーの描画 -->')
-    print('    <input id="bin_num" type="range" min="0" max="100" value="25" step="1" onmousemove="OnChangeValue();">')
-    print('    bin_num: <span id="bin_num_text">25</span>')
-    print('    <!-- jsファイルの読み込み -->')
-    print('    <script>var jsonData = {}</script>'.format(json))
-    print('    <script>{}</script>'.format(tree_plot_js))
-    print('    <script>{}</script>'.format(poisson_js))
-    print('    <script>{}</script>'.format(histogram_plot_js))
-    print('</body>')
+    html = '<!DOCTYPE html>\n'
+    html += '<head>\n'
+    html += '    <meta charset="utf-8">\n'
+    html += '    <script src="http://d3js.org/d3.v4.min.js"></script>\n'
+    html += '    <script src="https://cdn.jsdelivr.net/jstat/latest/jstat.min.js"></script>\n'
+    html += '    <!-- <link rel="stylesheet" type="text/css" href="d3_4.css"> -->\n'
+    html += '    <style>{}</style>'.format(style)
+    html += '</head>\n'
+    html += '\n'
+    html += '<body>\n'
+    html += '    <!-- ポップアップを配置させて、隠しておく -->\n'
+    html += '    <div class="popup" id="js-popup">\n'
+    html += '            <div class="popup-inner" id="popup-inner">\n'
+    html += '                <div class="close-btn" id="js-close-btn"></div>\n'
+    html += '            </div>\n'
+    html += '            <div class="black-background" id="js-black-bg"></div>\n'
+    html += '    </div>\n'
+    html += '    <!-- bin数設定のスライダーの描画 -->\n'
+    html += '    <input id="bin_num" type="range" min="0" max="100" value="25" step="1" onmousemove="OnChangeValue();">\n'
+    html += '    bin_num: <span id="bin_num_text">25</span>\n'
+    html += '    <!-- jsファイルの読み込み -->\n'
+    html += '    <script>var jsonData = {}</script>'.format(json)
+    html += '    <script>{}</script>\n'.format(tree_plot_js)
+    html += '    <script>{}</script>\n'.format(poisson_js)
+    html += '    <script>{}</script>\n'.format(histogram_plot_js)
+    html += '</body>\n'
+    
+    return html
 
 def main():
 
@@ -327,7 +330,8 @@ def main():
     x, y, X, Y = get_data(csv_path, obj_var, dummy_vars)
     clf = tree_calc(x, y, X, Y, depth)
     tree_dump(clf, obj_var, x, y)
-    make_html()
+    html = get_html()
+    print(html)
 
 CSS_PATH        = './style.css'
 JSON_PATH       = './data/tree_structure.json'

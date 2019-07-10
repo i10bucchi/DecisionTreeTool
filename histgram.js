@@ -46,7 +46,7 @@ function plot_histogram(currentNode) {
     var xScale = d3.scaleBand()
         .rangeRound([padding, width - padding])
         .padding(0.1)
-        .domain(data.map(function(d){ return d.hist_num; }));
+        .domain(data.map(function(d){ return d.x0; }));
     var yScale = d3.scaleLinear()
         .domain([0, d3.max(data, function(d){ return d.n_num; })])
         .range([height - padding, padding]);
@@ -63,7 +63,7 @@ function plot_histogram(currentNode) {
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", function(d){ return xScale(d.hist_num) - 1; })
+        .attr("x", function(d){ return xScale(d.x0) -1; })
         .attr("y", function(d){ return yScale(d.n_num); })
         .attr("width", xScale.bandwidth())
         .attr("height", function(d){ return height - padding - yScale(d.n_num); })

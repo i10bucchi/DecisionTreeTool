@@ -5,17 +5,17 @@ function make_destribution(tree_structure) {
 
     // 条件に該当するノード情報から分布に該当する座標点取得する
     function getTargetNode(i, datas) {
-        if (tree_structure[i].sigma < (0.6 * tree_structure[0].sigma) && tree_structure[i].n_sample > 0.1 * tree_structure[0].n_sample) {
-            data = getGaussianData(tree_structure[i].mu, tree_structure[i].sigma);
+        if (tree_structure[i].sigma < (0.6 * tree_structure[0].sigma)) {
+            data = tree_structure[i].hist_data
             datas.push(
                 {
                     'node_number': tree_structure[i].node_number,
                     'mu': tree_structure[i].mu,
                     'sigma': tree_structure[i].sigma,
-                    'min_q': d3.min(data, function(d) { return d.q }),
-                    'max_q': d3.max(data, function(d) { return d.q }),
-                    'max_p': d3.max(data, function(d) { return d.p }),
-                    "data": data
+                    'min_q': d3.min(data, function(d) { return d.x0 }),
+                    'max_q': d3.max(data, function(d) { return d.x1 }),
+                    'max_p': d3.max(data, function(d) { return d.prob }),
+                    'hist_data': data
                 }
             );
             return datas;
@@ -56,11 +56,6 @@ function make_destribution(tree_structure) {
 
     // y座標設定
     var yAxis = d3.axisLeft(y);
-
-    // グラフのカーブを定義
-    var line = d3.line()
-        .x(function(d) { return x(d.q); })
-        .y(function(d) { return y(d.p); });
     
     // マウスオーバーで表示する情報のクラスを作成
     var tooltip = d3.select("body").append("div").attr("class", "tooltip");
@@ -83,14 +78,17 @@ function make_destribution(tree_structure) {
         .attr("class", "y axis")
         .call(yAxis);
 
-    // 指定されたガウス分布に従うデータを取得
-    rootdata = getGaussianData(tree_structure[0].mu, tree_structure[0].sigma);
+    // ヒストグラムを滑らかに繋いでぐ
+    var histline = d3.line()
+        .curve(d3.curveMonotoneX)
+        .x(function(d) { return x( (d.x0 + d.x1) / 2 ) })
+        .y(function(d) { return y(d.prob) });
 
     // ルートノードのガウス分布最優推定モデルを作成
     svg.append("path")
-        .datum(rootdata)
+        .datum(tree_structure[0].hist_data)
         .attr("class", "line_root")
-        .attr("d", line)
+        .attr("d", histline)
         .style('fill', 'none')
         .style('stroke-width', '2.0px')
         .style('stroke', '#ff0000');
@@ -100,7 +98,7 @@ function make_destribution(tree_structure) {
         svg.append("path")
             .datum(datas[i])
             .attr("class", "line_" + datas[i].node_number)
-            .attr("d", line(datas[i].data))
+            .attr("d", histline(datas[i].hist_data))
             .style('fill', 'none')
             .style('stroke-width', '2.0px')
             .style('stroke', 'steelblue')
@@ -128,18 +126,6 @@ function make_destribution(tree_structure) {
                 tooltip.style("visibility", "hidden");
             });
     }
-}
-
-function getGaussianData(mu, sigma) {
-    var data = []
-    var inc = sigma * 3 / 100;
-    var range_min = mu - (sigma * 3);
-    var range_max = mu + (sigma * 3);
-    for (var q = range_min; q < range_max; q += inc) {
-        el = { "q": q, "p": jStat.normal.pdf( q, mu, sigma ) };
-        data.push(el);
-    }
-    return data;
 }
 
 make_destribution(jsonData);

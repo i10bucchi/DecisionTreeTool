@@ -1,6 +1,8 @@
 import pandas as pd
-import numpy as numpy
+
+import numpy as np
 def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
+
     """
     abst:
         ヒストグラムを描画するためのデータを出力
@@ -128,10 +130,25 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         num_outlier = get_outlier_num(tmp[obj_var], series)
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
         # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
-        cutting_bins = pd.cut(series.values, NUM_BINS, precision=0).value_counts().reset_index()
-        cutting_bins["x0"] = cutting_bins["index"].map(get_left)
-        cutting_bins["x1"] = cutting_bins["index"].map(get_right)
-        cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})
+
+        if (series.unique().max() <= NUM_BINS and y.dtype == np.int64):
+            series = series.astype(np.int64)
+            # NUM_BISの長さを持つ空のデータフレーム作成
+            cutting_bins = pd.DataFrame(index=range(NUM_BINS))
+            # x0を基準にする
+            cutting_bins["x0"] = cutting_bins.index
+            # x1は+1した値にする -> [0, 1), [1, 2)に対応するようにする
+            cutting_bins["x1"] = cutting_bins["x0"] + 1
+            # x0とx1の範囲に収まるデータ数をカウントする
+            cutting_bins["n_num"] = np.bincount(series.values, minlength=NUM_BINS)
+        else:
+            cutting_bins = pd.cut(series.values, NUM_BINS).value_counts().reset_index()
+            cutting_bins["x0"] = cutting_bins["index"].map(get_left)
+            cutting_bins["x1"] = cutting_bins["index"].map(get_right)
+            cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})
+
+        cutting_bins["prob"] = cutting_bins["n_num"] / cutting_bins["n_num"].sum() * NUM_BINS / (cutting_bins["x1"].max() - cutting_bins["x0"].min())
+
 
         # 整形したDataFrameを辞書型に変換
         add_dict = cutting_bins.to_dict(orient="records")

@@ -79,7 +79,9 @@ function plot_histogram(currentNode) {
         .data(data)
         .enter()
         .append("rect")
+
         .attr("x", function(d){ return xScale(d.x0) - 1; })
+
         .attr("y", function(d){ return yScale(d.n_num); })
         .attr("width", xScale.bandwidth())
         .attr("height", function(d){ return height - padding - yScale(d.n_num); })

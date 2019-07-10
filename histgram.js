@@ -42,7 +42,7 @@ function plot_histogram(currentNode) {
     var svg = d3.select("#popup-inner")
         .append("svg")
         .attr("width", "100%")
-        .attr("height", "50%")
+        .attr("height", "100%")
         .attr("id", "histogram");
     var xScale = d3.scaleBand()
         .rangeRound([padding, width - padding])

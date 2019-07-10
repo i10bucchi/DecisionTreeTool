@@ -118,13 +118,8 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
         series = replace_outlier(tmp[obj_var])
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
         # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
-        series = series.astype(np.int64)
-        if (series.unique().max() >= NUM_BINS):
-            cutting_bins = pd.cut(series.values, NUM_BINS).value_counts().reset_index()
-            cutting_bins["x0"] = cutting_bins["index"].map(get_left)
-            cutting_bins["x1"] = cutting_bins["index"].map(get_right)
-            cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})
-        else:
+        if (series.unique().max() <= NUM_BINS and y.dtype == np.int64):
+            series = series.astype(np.int64)
             # NUM_BISの長さを持つ空のデータフレーム作成
             cutting_bins = pd.DataFrame(index=range(NUM_BINS))
             # x0を基準にする
@@ -133,6 +128,11 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
             cutting_bins["x1"] = cutting_bins["x0"] + 1
             # x0とx1の範囲に収まるデータ数をカウントする
             cutting_bins["n_num"] = np.bincount(series.values, minlength=NUM_BINS)
+        else:
+            cutting_bins = pd.cut(series.values, NUM_BINS).value_counts().reset_index()
+            cutting_bins["x0"] = cutting_bins["index"].map(get_left)
+            cutting_bins["x1"] = cutting_bins["index"].map(get_right)
+            cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})
 
         cutting_bins["prob"] = cutting_bins["n_num"] / cutting_bins["n_num"].sum() * NUM_BINS / (cutting_bins["x1"].max() - cutting_bins["x0"].min())
 

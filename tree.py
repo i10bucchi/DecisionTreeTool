@@ -18,15 +18,17 @@ def usage():
     print("-o --objective_variable              - the column name that you want to predict")
     print("-c --categolical_variable            - column names that you want to use as one hot vector")
     print("-d --depth                           - the depth as tree parameter. default is 5.")
+    print("-b --num_of_bins                     - the value of bins when plot histogram")
     sys.exit(0)
 
-def tree_dump(clf, obj_var, x, y):
+def tree_dump(clf, obj_var, num_bins, x, y):
     '''
     abst:
         学習した決定木の構造をJsonで出力
     input:
         clf: scikit-learnの決定木の構造
         obj_var: 
+        num_bins: ヒストグラムのBin数
         x: 学習データ(特徴量)
         y: 学習データ(目的変数)
     output:
@@ -158,7 +160,7 @@ def tree_dump(clf, obj_var, x, y):
     ]
     
     # --- ヒストグラムを描画するためのデータを取得してjsonに追記するメソッド --- #
-    get_histdata(tree_structure_dict, x, y, obj_var)
+    get_histdata(tree_structure_dict, x, y, obj_var, num_bins)
 
     f = open("./data/tree_structure.json", "w")
     json.dump(tree_structure_dict, f, indent=4, allow_nan=True)
@@ -300,6 +302,7 @@ def main():
         "csv_path": None,
         "obj_var": None,
         "dummy_vars": None,
+        "num_of_bins": 25,
     }
     # sklearn.tree.DesisionTreeRegressor Options
     skltree_opts_dict = {
@@ -324,13 +327,14 @@ def main():
     try:
         opts, args = getopt.getopt(
             sys.argv[1:],
-            "hi:o:c:",
+            "hi:o:c:b:",
             [
                 # Decision Tree Tool Options
                 "help",
                 "input_csv=",
                 "objective_variable=",
-                "dategolical_variable=",
+                "categolical_variable=",
+                "bins_num="
                 # sklearn.tree.DesisionTreeRegressor Options
                 "criterion=",
                 "splitter=",
@@ -359,6 +363,8 @@ def main():
             tool_opts_dict["obj_var"] = a
         elif o in ("-c", "--categolical_variable"):
             tool_opts_dict["dummy_vars"] = a.split(',')
+        elif o in ("-b", "--bins_num"):
+            tool_opts_dict["num_of_bins"] = int(a)
         elif o in ("--criterion"):
             skltree_opts_dict["criterion"] = a
         elif o in ("--splitter"):
@@ -392,7 +398,7 @@ def main():
     # データ整形して決定木分析
     x, y, X, Y = get_data(tool_opts_dict["csv_path"], tool_opts_dict["obj_var"], tool_opts_dict["dummy_vars"])
     clf = tree_calc(x, y, X, Y, skltree_opts_dict)
-    tree_dump(clf, tool_opts_dict["obj_var"], x, y)
+    tree_dump(clf, tool_opts_dict["obj_var"], tool_opts_dict["num_of_bins"], x, y)
     html = get_html()
     print(html)
 

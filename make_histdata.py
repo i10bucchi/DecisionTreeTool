@@ -1,6 +1,8 @@
 import pandas as pd
+
 import numpy as np
-def get_histdata(tree_structure_dict, x, y, obj_var):
+def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
+
     """
     abst:
         ヒストグラムを描画するためのデータを出力
@@ -66,6 +68,7 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
             series: 各データの目的変数の値が格納されたpandas.Series
         outpu:
             replaced_series: 外れ値が取り除かれたSeries
+            outlier_num: 外れ値の数
         """
         # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
         # 外れ値を除く処理を行わない
@@ -82,19 +85,27 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
         
         # 外れ値の除去
         replaced_series = series[(min_outlier <= series) & (series <= max_outlier)]
-        # print("bef:{}, aft:{}".format(series.shape[0], replaced_series.shape[0]))
-        # print(series.describe())
-        # print(replaced_series.describe())
+        
         return replaced_series
+
+    def get_outlier_num(bef_series, aft_series):
+        """
+        abst:
+            入力された2つのシリーズの行数の差を返す関数
+        input:
+            bef_series: 外れ値を除去する前のシリーズ
+            aft_series: 外れ値を除去した後のシリーズ
+        output:
+            シリーズの行数の差
+        """
+        return bef_series.shape[0] - aft_series.shape[0]
         
 
     df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
 
 
-    sigma = tree_structure_dict[0]["sigma"]
-    #df = df[df[obj_var] < (sigma * 4)]
     # BIN数の設定
-    NUM_BINS = 25
+    NUM_BINS = num_bins
     
     for node_info in tree_structure_dict:
         # 各ノードのヒストグラムを書くための条件を取得
@@ -116,8 +127,10 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
             return x.right
         # cutメソッドを適用する前に外れ値がある場合は除く。
         series = replace_outlier(tmp[obj_var])
+        num_outlier = get_outlier_num(tmp[obj_var], series)
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
         # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
+
         if (series.unique().max() <= NUM_BINS and y.dtype == np.int64):
             series = series.astype(np.int64)
             # NUM_BISの長さを持つ空のデータフレーム作成
@@ -136,7 +149,9 @@ def get_histdata(tree_structure_dict, x, y, obj_var):
 
         cutting_bins["prob"] = cutting_bins["n_num"] / cutting_bins["n_num"].sum() * NUM_BINS / (cutting_bins["x1"].max() - cutting_bins["x0"].min())
 
+
         # 整形したDataFrameを辞書型に変換
         add_dict = cutting_bins.to_dict(orient="records")
         # もともとのtree_structure_dictに追記
         node_info["hist_data"] = add_dict
+        node_info["num_outlier"] = num_outlier

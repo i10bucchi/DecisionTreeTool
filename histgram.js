@@ -27,13 +27,14 @@ function plot_histogram(currentNode) {
     // ヒストグラム描画用のデータの読み込み
     data = currentNode.data.data.hist_data
     // 描画する画面のサイズ設定
-    var margin = {top: 10, right: 30, bottom: 30, left: 50},
+    var margin = {top: 10, right: 30, bottom: 30, left: 70},
         svgwidth = (screen.width / 2) - margin.left - margin.right;
         svgheight = (screen.height / 2) - margin.top - margin.bottom;
     
     var width = screen.width / 1.7;
     var height = screen.height / 2;
     var padding = margin.left;
+
     
     // tooltip用div要素を追加
     var tooltip = d3.select("#popup-inner").append("div").attr("class", "tooltip")
@@ -41,7 +42,7 @@ function plot_histogram(currentNode) {
     var svg = d3.select("#popup-inner")
         .append("svg")
         .attr("width", "100%")
-        .attr("height", "100%")
+        .attr("height", "50%")
         .attr("id", "histogram");
     var xScale = d3.scaleBand()
         .rangeRound([padding, width - padding])
@@ -51,19 +52,36 @@ function plot_histogram(currentNode) {
         .domain([0, d3.max(data, function(d){ return d.n_num; })])
         .range([height - padding, padding]);
 
+    console.log(screen.width)
+    console.log(document.getElementById("histogram").width)
+
     svg.append("g")
         .attr("transform", "translate(" + 0 + "," + (height-padding) + ")")
-        .call(d3.axisBottom(xScale));
+        .call(d3.axisBottom(xScale)
+                .tickValues(xScale.domain().filter(function(d,i){ 
+                    return !(i % 3); }))
+            );
+        
     svg.append("g")
         .attr("transform", "translate(" + padding + "," + 0 + ")")
         .call(d3.axisLeft(yScale))
+        .append("text")
+        .attr("x", -50)
+        .attr("y", 200)
+        .style("text-anchor", "middle")
+        .style("fill", "black")
+        .style("writing-mode", "tb")
+        .style("glyph-orientation-vertical", 90)
+        .text("num_sample");
 
     svg.append("g")
         .selectAll("rect")
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", function(d){ return xScale(d.x0) -1; })
+
+        .attr("x", function(d){ return xScale(d.x0) - 1; })
+
         .attr("y", function(d){ return yScale(d.n_num); })
         .attr("width", xScale.bandwidth())
         .attr("height", function(d){ return height - padding - yScale(d.n_num); })

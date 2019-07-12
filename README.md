@@ -5,24 +5,6 @@
 このツールは決定木分析の実行と可視化を行うためのツールです.
 現在は回帰決定木分析のみに対応しています.
 
-## Requirement
-
-### python3
-
-- numpy
-    ```
-    $ pip install numpy
-    ```
-
-- pandas
-    ```
-    $ pip3 install pandas
-    ```
-
-- scikit-learn
-    ```
-    $ pip3 install scikit-learn
-    ```
 
 ## Instllation
 
@@ -31,6 +13,14 @@
 $ git clone https://github.com/i10bucchi/DecisionTreeTool.git
 // dataという名前でディレクトリを作ってくだいさい
 $ mkdir ./DecisionTreeTool/data
+```
+
+
+## Requirement
+### python3
+
+```
+$ pip install -r requirements.txt
 ```
 
 ## Usage

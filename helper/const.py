@@ -1,0 +1,5 @@
+CSS_PATH        = './css/style.css'
+JSON_PATH       = './data/tree_structure.json'
+TREE_JS_PATH    = './js/tree.js'
+HIST_JS_PATH    = './js/histgram.js'
+FIT_JS_PATH     = './js/cov_fit.js'

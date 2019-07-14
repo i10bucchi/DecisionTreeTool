@@ -30,8 +30,8 @@ def get_data(csv_path, obj_var, dummy_vars):
     df = df.fillna(-1)
 
     # 学習データとテストデータに分ける
-    ldf = int(len(df.index) * 0.1)
-    df_train = df[ldf+1:]
+    ldf = int(len(df.index) * 0.2)
+    df_train = df[ldf:]
     df_test = df[:ldf]
 
     # 説明変数と目的変数へ分割

@@ -33,7 +33,7 @@ def get_parent_id(child_l_list, child_r_list, node):
     input:
         child_l_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
         child_r_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
-        node: ノードインデックス
+        node (int): ノードインデックス
     output:
         親ノードのインデックス (int)
     '''
@@ -51,12 +51,12 @@ def get_leaf_by_node(child_l_list, child_r_list, node, leafs):
     abst:
         引数で与えられたノードに属する葉のインデックスを取得
     input:
-        child_l_list: 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
-        child_r_list: 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
-        node: ノードインデックス
-        leafs: nodeに属する葉部分のノードインデックス
+        child_l_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
+        child_r_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
+        node (int): ノードインデックス
+        leafs (list): nodeに属する葉部分のノードインデックス
     output:
-        leafs: nodeに属する葉部分のノードインデックス
+        leafs (list): nodeに属する葉部分のノードインデックス
     '''
     if child_l_list[node] != -1:
         leafs = get_leaf_by_node(child_l_list, child_r_list, child_l_list[node], leafs)

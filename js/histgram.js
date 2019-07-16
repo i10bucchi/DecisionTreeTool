@@ -21,9 +21,7 @@ function popup_func() {
 // ヒストグラム描画用関数
 function plot_histogram(currentNode) {
     // ヒストグラムがすでに描画されていれば、削除する。
-    d3.select("#popup-inner").selectAll("#hist_describe")
-        .remove();
-    d3.select("#popup-inner").selectAll("#outlier_describe")
+    d3.select("#popup-inner").selectAll("#describe")
         .remove();
     d3.select("body").selectAll("#histogram")
         .remove();
@@ -56,9 +54,6 @@ function plot_histogram(currentNode) {
     var yScale = d3.scaleLinear()
         .domain([0, d3.max(data, function(d){ return d.n_num; })])
         .range([height - padding, padding]);
-
-    // console.log(screen.width)
-    // console.log(document.getElementById("histogram").clientWidth)
 
     svg.append("g")
         .attr("transform", "translate(" + 0 + "," + (height-padding) + ")")
@@ -110,59 +105,49 @@ function plot_histogram(currentNode) {
 
 
     var hist_describe = currentNode.data.data.hist_describe
+    hist_describe["　"] = "ヒストグラム"
     var outlier_describe = currentNode.data.data.outlier_describe
-
-    var hist_names = d3.keys(hist_describe)
-    var outlier_names = d3.keys(outlier_describe)
-    var hist_val = [d3.values(hist_describe)]
-    var outlier_val = [d3.values(outlier_describe)]
-    /* ヒストグラムの基本統計量を描画 */
-    var table_left = d3.select("#popup-inner")
-        .append("div").attr("class", "blocka").attr("id", "hist_describe").attr("align", "center")
-        .append("text").text("ヒストグラムの基本統計量")
-        .append("table").attr("class", "table");
+    outlier_describe["　"] = "外れ値"
+    
+    // キー順序のリスト
+    var order = ["　", "count", "mean", "std", "min", "max", "25%", "50%", "75%"];
+    var tmp = {}, tmp2 = {}
+    // キーを並べ替え
+    for (var key in order){
+        tmp[order[key]] = hist_describe[order[key]];
+        tmp2[order[key]] = outlier_describe[order[key]];
+    }
+    var test_dict = [tmp, tmp2]
+    var names = d3.keys(test_dict[0])
+    /* 基本統計量を描画 */
+    var table = d3.select("#popup-inner")
+        .append("div").attr("id", "describe").attr("align", "center")
+        .append("table")
+        .attr("class", "table")
+        .attr("border", "0")
+        .attr("cellspacing", "0")
+        .attr("cellpadding", "5");
         
-    table_left.append("thead")
+    table.append("thead")
         .append("tr")
         .selectAll("th")
-        .data(hist_names)
+        .data(names)
         .enter()
         .append("th")
         .text(function(d) { return d; });
     
-    table_left.append("tbody")
+    table.append("tbody")
         .selectAll("tr")
-        .data(hist_val)
+        .data(test_dict)
         .enter()
         .append("tr")
         .selectAll("td")
-        .data(function(row){ return row;})
+        .data(function(row){  
+            return d3.entries(row);})
         .enter()
         .append("td")
-        .text(function(d) { return d; });
+        .text(function(d) {
+            return d.value; });
         
-    /* 外れ値の基本統計量を描画 */
-    var table_right = d3.select("#popup-inner")
-        .append("div").attr("class", "blockb").attr("id", "outlier_describe").attr("align", "center")
-        .append("text").text("外れ値の基本統計量")
-        .append("table").attr("class", "table");
-        
-    table_right.append("thead")
-        .append("tr")
-        .selectAll("th")
-        .data(outlier_names)
-        .enter()
-        .append("th")
-        .text(function(d) { return d; });
-    table_right.append("tbody")
-        .selectAll("tr")
-        .data(outlier_val)
-        .enter()
-        .append("tr")
-        .selectAll("td")
-        .data(function(row) { return row; })
-        .enter()
-        .append("td")
-        .text(function(d) { return d; });
     
 }

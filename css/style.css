@@ -101,9 +101,7 @@ div.blocka {
  }
  .table th{
      text-align: center;
-     width: 50px;
  }
  .table td{
-     text-align: center;
-     width: 50px;
+     text-align: right;
  }

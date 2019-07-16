@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import pandas as pd
 import sys
 import pathlib
 
@@ -133,6 +134,100 @@ class TestTreeToJson(unittest.TestCase):
             actual = tree_to_json.get_leaf_by_node(p["arg1"], p["arg2"], p["arg3"], p["arg4"])
 
             self.assertEqual(actual, p["expected"])
+
+    def test_get_node_mu(self):
+        # pattern[0]で想定している木のイメージ
+        # node_id(sample_num)と表している
+        #
+        #         / 6(2)
+        #    4(5)
+        #  /      \ 5(3)
+        # 0(10)      
+        #  \      / 3(4)
+        #    1(5)
+        #         \ 2(1)
+        #
+        pattern = [
+            {
+                "description": "Function should return collectry values when node that is leaf posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 3,
+                "expected": (1 + 2 + 3 + 4) / 4
+            },
+            {
+                "description": "Function should return collectry values when node that is node posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 4,
+                "expected": (5 + 6 + 7 + 8 + 9) / 5
+            },
+            {
+                "description": "Function should return collectry values when node that is root posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 0,
+                "expected": (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) / 10
+            },
+        ]
+
+        for i, p in enumerate(pattern):
+            actual = tree_to_json.get_node_mu(p["arg1"], p["arg2"], p["arg3"], p["arg4"], p["arg5"])
+
+            self.assertEqual(actual, p["expected"])
+
+    def test_get_node_sigma(self):
+        # pattern[0]で想定している木のイメージ
+        # node_id(sample_num)と表している
+        #
+        #         / 6(2)
+        #    4(5)
+        #  /      \ 5(3)
+        # 0(10)      
+        #  \      / 3(4)
+        #    1(5)
+        #         \ 2(1)
+        #
+        pattern = [
+            {
+                "description": "Function should return collectry values when node that is leaf posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 3,
+                "expected": np.std(np.array([1, 2, 3, 4]))
+            },
+            {
+                "description": "Function should return collectry values when node that is node posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 4,
+                "expected": np.std(np.array([5, 6, 7, 8, 9]))
+            },
+            {
+                "description": "Function should return collectry values when node that is root posision is given.",
+                "arg1": np.array([1, 2, -1, -1, 5, -1, -1]),
+                "arg2": np.array([4, 3, -1, -1, 6, -1, -1]),
+                "arg3": np.array([2, 3, 3, 3, 3, 5, 5, 5, 6, 6]),
+                "arg4": pd.Series(range(10)),
+                "arg5": 0,
+                "expected": np.std(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            },
+        ]
+
+        for i, p in enumerate(pattern):
+            actual = tree_to_json.get_node_sigma(p["arg1"], p["arg2"], p["arg3"], p["arg4"], p["arg5"])
+
+            self.assertEqual(actual, p["expected"], p['description'])
 
 if __name__ == "__main__":
     unittest.main()

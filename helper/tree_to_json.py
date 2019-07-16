@@ -77,13 +77,13 @@ def get_node_mu(child_l_list, child_r_list, reaching_leafs, y, node):
     abst:
         引数で与えられたノードに属するデータの平均値を取得
     input:
-        child_l_list: 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
-        child_r_list: 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
-        reaching_leaf: データが到達したノードid
-        y: 学習データ目的変数
-        node: ノードインデックス
+        child_l_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
+        child_r_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
+        reaching_leaf (numpy.array): データが到達したノードid
+        y (pandas.Series): 学習データ目的変数
+        node (int): ノードインデックス
     output:
-        平均値
+        平均値 (float)
     '''
     target_leafs = get_leaf_by_node(child_l_list, child_r_list, node, [])
     data_indexes = np.array([])
@@ -97,13 +97,13 @@ def get_node_sigma(child_l_list, child_r_list, reaching_leafs, y, node):
     abst:
         引数で与えられたノードに属するデータの平均値を取得
     input:
-        child_l_list: 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
-        child_r_list: 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
-        reaching_leaf: データが到達した葉のノードid
-        y: 学習データ目的変数
-        node: ノードインデックス
+        child_l_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には左子ノードのノードidが入っている
+        child_r_list (numpy.array): 要素番号がノードidとなっており, 対応する要素番号の中には右子ノードのノードidが入っている
+        reaching_leaf (numpy.array): データが到達した葉のノードid
+        y (pandas.Series): 学習データ目的変数
+        node (int): ノードインデックス
     output:
-        分散値
+        分散値 (float)
     '''
     target_leafs = get_leaf_by_node(child_l_list, child_r_list, node, [])
     data_indexes = np.array([])

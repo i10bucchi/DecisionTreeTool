@@ -1,114 +1,32 @@
-import sys
-import getopt
+import argparse
 
-def usage():
-    print("Decision Tree Tool")
-    print("")
-    print("Usage: python3 tree.py -i ./user_scan.csv -o scan_num -c a02,a04 -d 7 > result.html")
-    print("-i --input_csv                       - path of csv file")
-    print("-o --objective_variable              - the column name that you want to predict")
-    print("-c --categolical_variable            - column names that you want to use as one hot vector")
-    print("-d --depth                           - the depth as tree parameter. default is 5.")
-    print("-b --num_of_bins                     - the value of bins when plot histogram")
-    sys.exit(0)
+def int_or_float(string):
+    if '.' in string:
+        return float(string)
+    else:
+        return int(string)
 
-def get_command_opts(c_args):
-    # パラメータが指定されていない場合は使い方を表示
-    if not len(c_args):
-        usage()
+def parse_commandline_opts():
+    parser = argparse.ArgumentParser(description="Decision Tree Tool")
+    parser.add_argument("-i", "--input_csv", required=True, help="path of csv file")
+    parser.add_argument("-o", "--objective_variable", required=True, help="the column name that you want to predict")
+    parser.add_argument("-c", "--categolical_variable", default=None, nargs='?', help="column names that you want to use as one hot vector")
+    parser.add_argument("-b", "--bins_num", default=25, type=int, help="the value of bins when plot histogram")
+    parser.add_argument("--criterion", default="mse", help="the function to measure the quality of a split")
+    parser.add_argument("--splitter", default="best", help="the strategy used to choose the split at each node")
+    parser.add_argument("--max_depth", default=None, type=int, help="the maximum depth of the tree")
+    parser.add_argument("--min_samples_split", default=2, type=int_or_float, help="the minimum number of samples required to split an internal node")
+    parser.add_argument("--min_samples_leaf", default=1, type=int_or_float, help="the minimum number of samples required to be at a leaf node")
+    parser.add_argument("--min_weight_fraction_leaf", default=0., type=float, help="the minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node")
+    parser.add_argument("--max_features", default=None, help="the number of features to consider when looking for the best split")
+    parser.add_argument("--random_state", default=None, type=int, help="the seed used by the random number generator")
+    parser.add_argument("--max_leaf_nodes", default=None, type=int, help="grow a tree with max_leaf_nodes in best-first fashion")
+    parser.add_argument("--min_impurity_decrease", default=0, type=float, help="a node will be split if this split induces a decrease of the impurity greater than or equal to this value")
+    parser.add_argument("--presort", default=False, type=bool, help="Whether to presort the data to speed up the finding of best splits in fitting")
 
-    # Decision Tree Tool Option
-    tool_opts_dict = {
-        "csv_path": None,
-        "obj_var": None,
-        "dummy_vars": None,
-        "num_of_bins": 25,
-    }
-    # sklearn.tree.DesisionTreeRegressor Options
-    skltree_opts_dict = {
-        "criterion": "mse",
-        "splitter": "best",
-        "max_depth": None,
-        "min_samples_split": 2,
-        "min_samples_leaf": 1,
-        "min_weight_fraction_leaf": 0.,
-        "max_features": None,
-        "random_state": None,
-        "max_leaf_nodes": None,
-        "min_impurity_decrease": 0.,
-        "presort": False
-    }
-    
-    # パラメータ定義
-    try:
-        opts, args = getopt.getopt(
-            c_args,
-            "hi:o:c:b:",
-            [
-                # Decision Tree Tool Options
-                "help",
-                "input_csv=",
-                "objective_variable=",
-                "categolical_variable=",
-                "bins_num="
-                # sklearn.tree.DesisionTreeRegressor Options
-                "criterion=",
-                "splitter=",
-                "max_depth=",
-                "min_samples_split=",
-                "min_samples_leaf=",
-                "min_weight_fraction_leaf=",
-                "max_features=",
-                "random_state=",
-                "max_leaf_nodes=",
-                "min_impurity_decrease=",
-                "presort="
-            ],
-        )
-    except getopt.GetoptError as err:
-        print(str(err))
-        usage()
-    
-    # 各パラメータの値を取得
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-i", "--input_csv"): 
-            tool_opts_dict["csv_path"] = a
-        elif o in ("-o", "--objective_variable"):
-            tool_opts_dict["obj_var"] = a
-        elif o in ("-c", "--categolical_variable"):
-            tool_opts_dict["dummy_vars"] = a.split(',')
-        elif o in ("-b", "--bins_num"):
-            tool_opts_dict["num_of_bins"] = int(a)
-        elif o in ("--criterion"):
-            skltree_opts_dict["criterion"] = a
-        elif o in ("--splitter"):
-            skltree_opts_dict["splitter"] = a
-        elif o in ("--max_depth"):
-            skltree_opts_dict["max_depth"] = int(a)
-        elif o in ("--min_samples_split"):
-            skltree_opts_dict["min_samples_split"] = int(a)
-        elif o in ("--min_samples_leaf"):
-            skltree_opts_dict["min_samples_leaf"] = int(a) # floatも取り得る
-        elif o in ("--min_weight_fraction_leaf"):
-            skltree_opts_dict["min_weight_fraction_leaf"] = float(a)
-        elif o in ("--max_features"):
-            skltree_opts_dict["max_features"] = a # int, float, stringを取り得る
-        elif o in ("--random_state"):
-            skltree_opts_dict["random_state"] = int(a)
-        elif o in ("--max_leaf_nodes"):
-            skltree_opts_dict["max_leaf_nodes"] = int(a)
-        elif o in ("--min_impurity_decrease"):
-            skltree_opts_dict["min_impurity_decrease"] = float(a)
-        elif o in ("--presort"):
-            skltree_opts_dict["presort"] = bool(a)
-        else:
-            assert False, "Unhandled Option"
-    
-    # 最低限のパラメータが指定されていない場合は使い方を表示
-    if (tool_opts_dict["csv_path"] == None) or (tool_opts_dict["obj_var"] == None):
-        print("Error: -i and -o are specified always.")
-        usage()
-    
-    return tool_opts_dict, skltree_opts_dict
+    opts = vars(parser.parse_args())
+
+    if opts["categolical_variable"] != None:
+        opts["categolical_variable"] = opts["categolical_variable"].split(',')
+
+    return opts

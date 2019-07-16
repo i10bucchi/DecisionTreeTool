@@ -229,5 +229,316 @@ class TestTreeToJson(unittest.TestCase):
 
             self.assertEqual(actual, p["expected"], p['description'])
 
+    def test_get_left_and_right(self):
+        # tree_dictで渡している木のイメージ
+        # 数字はnode_idを表している
+        #
+        #       / 6
+        #    4
+        #  /    \ 5
+        # 0      
+        #  \    / 3
+        #    1
+        #       \ 2
+        #
+        tree_dict = [
+            {
+                "node_number": 0,
+                "feature": "a04",
+                "threshold": 2.5,
+                "parent": None,
+                "child_l": 1,
+                "child_r": 4
+            },
+            {
+                "node_number": 1,
+                "feature": "a02",
+                "threshold": 1.5,
+                "parent": 0,
+                "child_l": 2,
+                "child_r": 3
+            },
+            {
+                "node_number": 2,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 1,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 3,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 1,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 4,
+                "feature": "a04",
+                "threshold": 7.5,
+                "parent": 0,
+                "child_l": 5,
+                "child_r": 6
+            },
+            {
+                "node_number": 5,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 4,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 6,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 4,
+                "child_l": -1,
+                "child_r": -1
+            },
+        ]
+        pattern = [
+            {
+                "description": "Function should return False when there is no parent of the given node.",
+                "arg1": 0,
+                "arg2": tree_dict,
+                "expected": False
+            },
+            {
+                "description": "Function should return False when a nonexistent node number is specified",
+                "arg1": 100,
+                "arg2": tree_dict,
+                "expected": False
+            },
+            {
+                "description": "Function shoud return 'LEFT' when I was the left child.",
+                "arg1": 1,
+                "arg2": tree_dict,
+                "expected": "LEFT"
+            },
+            {
+                "description": "Function should return 'LEFT' when I was the left child.",
+                "arg1": 5,
+                "arg2": tree_dict,
+                "expected": "LEFT"
+            },
+            {
+                "description": "Function should return 'LEFT' when I was the left child.",
+                "arg1": 2,
+                "arg2": tree_dict,
+                "expected": "LEFT"
+            },
+            {
+                "description": "Function should return 'RIGHT' when I was the right child.",
+                "arg1": 4,
+                "arg2": tree_dict,
+                "expected": "RIGHT"
+            },
+            {
+                "description": "Function should return 'RIGHT' when I was the right child.",
+                "arg1": 3,
+                "arg2": tree_dict,
+                "expected": "RIGHT"
+            },
+            {
+                "description": "Function should return 'RIGHT' when I was the right child.",
+                "arg1": 6,
+                "arg2": tree_dict,
+                "expected": "RIGHT"
+            }
+        ]
+
+        for i, p in enumerate(pattern):
+            actual = tree_to_json.get_left_and_right(p["arg1"], p["arg2"])
+
+            self.assertEqual(actual, p["expected"], p["description"])
+        
+    def test_get_feat_to_root(self):
+        # tree_dictで渡している木のイメージ
+        # 数字はnode_idを表している
+        #
+        #       / 6
+        #    4
+        #  /    \ 5
+        # 0      
+        #  \    / 3
+        #    1
+        #       \ 2
+        #
+        tree_dict = [
+            {
+                "node_number": 0,
+                "feature": "a04",
+                "threshold": 2.5,
+                "parent": None,
+                "child_l": 1,
+                "child_r": 4
+            },
+            {
+                "node_number": 1,
+                "feature": "a02",
+                "threshold": 1.5,
+                "parent": 0,
+                "child_l": 2,
+                "child_r": 3
+            },
+            {
+                "node_number": 2,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 1,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 3,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 1,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 4,
+                "feature": "a04",
+                "threshold": 7.5,
+                "parent": 0,
+                "child_l": 5,
+                "child_r": 6
+            },
+            {
+                "node_number": 5,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 4,
+                "child_l": -1,
+                "child_r": -1
+            },
+            {
+                "node_number": 6,
+                "feature": "a03",
+                "threshold": -2.0,
+                "parent": 4,
+                "child_l": -1,
+                "child_r": -1
+            },
+        ]
+        pattern = [
+            {
+                "description": "Function should return empty array when there is no parent of given node.",
+                "arg1": 0,
+                "arg2": tree_dict,
+                "expected": []
+            },
+            {
+                "description": "Function should return empty array when a nonexistent node number is specified.",
+                "arg1": 100,
+                "arg2": tree_dict,
+                "expected": []
+            },
+            {
+                "description": "Function should return array containing codinations and thresholds when there is parent of given node.",
+                "arg1": 1,
+                "arg2": tree_dict,
+                "expected": [
+                    {
+                        "node_num":0,
+                        "feature": "a04",
+                        "threshold": 2.5,
+                        "LorR": "LEFT"
+                    }
+                ]
+            },
+            {
+                "description": "Function should return array containing codinations and thresholds when there is parent of given node.",
+                "arg1": 2,
+                "arg2": tree_dict,
+                "expected": [
+                    {
+                        "node_num": 1,
+                        "feature": "a02",
+                        "threshold": 1.5,
+                        "LorR": "LEFT"
+                    },
+                    {
+                        "node_num": 0,
+                        "feature": "a04",
+                        "threshold": 2.5,
+                        "LorR": "LEFT"
+                    }
+                ]
+            },
+            {
+                "description": "Function should return array containing codinations and thresholds when there is parent of given node.",
+                "arg1": 6,
+                "arg2": tree_dict,
+                "expected": [
+                    {
+                        "node_num": 4,
+                        "feature": "a04",
+                        "threshold": 7.5,
+                        "LorR": "RIGHT"
+                    },
+                    {
+                        "node_num": 0,
+                        "feature": "a04",
+                        "threshold": 2.5,
+                        "LorR": "RIGHT"
+                    }
+                ]
+            }
+        ]
+        for i, p in enumerate(pattern):
+            actual = tree_to_json.get_feat_to_root(p["arg1"], p["arg2"])
+
+            self.assertEqual(actual, p["expected"], p["description"])
+    
+    def test_get_describe(self):
+        pattern = [
+            {
+                "description": "Function should return empty dictionary when pd.Series is not given.",
+                "arg1": 0,
+                "expected":{}
+            },
+            {
+                "description": "Function should return pd.Series when pd.Series is given.",
+                "arg1": pd.Series(range(10)),
+                "expected": {
+                    "count": 10.0,
+                    "mean": 4.5,
+                    "std": 3.03,
+                    "min": 0.0,
+                    "max": 9.0,
+                    "25%": 2.25,
+                    "50%": 4.5,
+                    "75%": 6.75
+                }
+            },
+            {
+                "description": "Function should return pd.Series when pd.Series is geven.",
+                "arg1": pd.Series(range(20)),
+                "expected": {
+                    "count": 20.0,
+                    "mean": 9.5,
+                    "std": 5.92,
+                    "min": 0.0,
+                    "max": 19.0,
+                    "25%": 4.75,
+                    "50%": 9.5,
+                    "75%": 14.25
+                }
+            }
+        ]
+
+        for i, p in enumerate(pattern):
+            actual = tree_to_json.get_describe(p["arg1"])
+
+            self.assertEqual(actual, p["expected"], p["description"])
+
+
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -112,6 +112,122 @@ def get_node_sigma(child_l_list, child_r_list, reaching_leafs, y, node):
     
     return y[data_indexes].std(ddof=0)
 
+
+def get_left_and_right(node_number, tree_structure_dict):
+    """
+    abst:  
+        与えられたnode_numberの親を見に行き、
+        node_numberの位置が兄弟ノードと比較して右か左かを返すメソッド
+    input:
+        node_number: 位置を知りたいノードの番号
+        tree_structure_dict: 木構造が格納された辞書
+    output:
+        False: 親がいなかった場合
+        "LEFT": 左だった場合
+        "RIGHT": 右だった場合    
+    """
+    # 指定したノード番号が存在しない時
+    if (node_number >= len(tree_structure_dict)):
+        return False
+    # 指定したノード番号の親が存在しない時
+    if (tree_structure_dict[node_number]["parent"] == None):
+        return False
+    
+
+    parent_num = tree_structure_dict[node_number]["parent"]
+    parent_left_child = tree_structure_dict[parent_num]["child_l"]
+    parent_right_child = tree_structure_dict[parent_num]["child_r"]
+    
+    if (node_number == parent_left_child):
+        return "LEFT"
+    elif (node_number == parent_right_child):
+        return "RIGHT"
+    # 見つからなかった時
+    return False
+
+def get_feat_to_root(node_number, tree_structure_dict):
+    """
+    abst:
+        与えられたnode_numberからrootまでの特徴と条件を返す関数
+        ##### 再帰的なメソッドです ######
+    input:
+        node_number: ノードの番号
+        tree_structure_dict: 木構造が格納された辞書
+    output:
+        []: node_numberの親がいないとき
+        辞書のリスト: それ以外
+    """
+    # 指定したノード番号が存在しない時
+    if (node_number >= len(tree_structure_dict)):
+        return []
+    # 指定したノード番号の親がいない時
+    if (tree_structure_dict[node_number]["parent"] == None):
+        return []
+
+    # 辞書のリストを返す
+    return [
+        {
+            "node_num": tree_structure_dict[node_number]["parent"],
+            "feature": tree_structure_dict[tree_structure_dict[node_number]["parent"]]["feature"],
+            "threshold": tree_structure_dict[tree_structure_dict[node_number]["parent"]]["threshold"],
+            "LorR": get_left_and_right(node_number, tree_structure_dict)
+        }
+    ] + get_feat_to_root(tree_structure_dict[node_number]["parent"], tree_structure_dict)
+
+def replace_outlier(series, bias=1.5):
+    """
+    abst:
+        外れ値(最大値)を除くメソッド
+    input:
+        series: 各データの目的変数の値が格納されたpandas.Series
+    outpu:
+        replaced_series: 外れ値が取り除かれたSeries
+        outlier: 外れ値のみのSeries
+    """
+    # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
+    # 外れ値を除く処理を行わない
+    if (series.shape[0] < 5):
+        return series
+
+    # 四分位数
+    q1 = series.quantile(.25)
+    q3 = series.quantile(.75)
+    iqr = q3 - q1
+    # 外れ値の基準点
+    min_outlier = q1 - (iqr * bias)
+    max_outlier = q3 + (iqr * bias)
+    
+    # 外れ値の除去
+    replaced_series = series[(min_outlier <= series) & (series <= max_outlier)]
+    outlier = series[~((min_outlier <= series) & (series <= max_outlier))]
+    
+    return replaced_series, outlier
+
+def get_describe(series):
+    """
+    abst:
+        シリーズの基本統計量を返す関数
+    input:
+        series: pandasシリーズ
+    output:
+        シリーズの基本統計量(辞書型)
+    """
+    # pandasシリーズが与えられてなかった時
+    if (type(series) != type(pd.Series(range(10)))):
+        return {}
+    desc = series.describe()
+    return_dict = {
+        "count": round(desc["count"], 2),
+        "mean": round(desc["mean"], 2),
+        "std": round(desc["std"], 2),
+        "min": round(desc["min"], 2),
+        "max": round(desc["max"], 2),
+        "25%": round(desc["25%"], 2),
+        "50%": round(desc["50%"], 2),
+        "75%": round(desc["75%"], 2)
+    }
+    return return_dict
+
 def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
 
     """
@@ -120,107 +236,7 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
     input:
         tree_structure_dict: 決定木の構造が格納された辞書のリストが格納された変数
     output:
-    """
-    def get_left_and_right(node_number):
-        """
-        abst:  
-            与えられたnode_numberの親を見に行き、
-            node_numberの位置が兄弟ノードと比較して右か左かを返すメソッド
-        input:
-            node_number: 位置を知りたいノードの番号
-        output:
-            False: 親がいなかった場合
-            "LEFT": 左だった場合
-            "RIGHT": 右だった場合    
-        """
-        if (tree_structure_dict[node_number]["parent"] == None):
-            return False
-
-        parent_num = tree_structure_dict[node_number]["parent"]
-        parent_left_child = tree_structure_dict[parent_num]["child_l"]
-        parent_right_child = tree_structure_dict[parent_num]["child_r"]
-        
-        if (node_number == parent_left_child):
-            return "LEFT"
-        elif (node_number == parent_right_child):
-            return "RIGHT"
-
-        return False
-
-    def get_feat_to_root(node_number):
-        """
-        abst:
-            与えられたnode_numberからrootまでの特徴と条件を返す関数
-            ##### 再帰的なメソッドです ######
-        input:
-            node_number: ノードの番号
-        output:
-            []: node_numberの親がいないとき
-            辞書のリスト: それ以外
-        """
-        if (tree_structure_dict[node_number]["parent"] == None):
-            return []
-
-        # 辞書のリストを返す
-        return [
-            {
-                "node_num": tree_structure_dict[node_number]["parent"],
-                "feature": tree_structure_dict[tree_structure_dict[node_number]["parent"]]["feature"],
-                "threshold": tree_structure_dict[tree_structure_dict[node_number]["parent"]]["threshold"],
-                "LorR": get_left_and_right(node_number)
-            }
-        ] + get_feat_to_root(tree_structure_dict[node_number]["parent"])
-    
-    def replace_outlier(series, bias=1.5):
-        """
-        abst:
-            外れ値(最大値)を除くメソッド
-        input:
-            series: 各データの目的変数の値が格納されたpandas.Series
-        outpu:
-            replaced_series: 外れ値が取り除かれたSeries
-        """
-        # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
-        # 外れ値を除く処理を行わない
-        if (series.shape[0] < 5):
-            return series
-
-        # 四分位数
-        q1 = series.quantile(.25)
-        q3 = series.quantile(.75)
-        iqr = q3 - q1
-        # 外れ値の基準点
-        min_outlier = q1 - (iqr * bias)
-        max_outlier = q3 + (iqr * bias)
-        
-        # 外れ値の除去
-        replaced_series = series[(min_outlier <= series) & (series <= max_outlier)]
-        outlier = series[~((min_outlier <= series) & (series <= max_outlier))]
-        
-        return replaced_series, outlier
-
-    def get_describe(series):
-        """
-        abst:
-            シリーズの基本統計量を返す関数
-        input:
-            series: pandasシリーズ
-        output:
-            シリーズの基本統計量(辞書型)
-        """
-        desc = series.describe()
-        return_dict = {
-            "count": round(desc["count"], 2),
-            "mean": round(desc["mean"], 2),
-            "std": round(desc["std"], 2),
-            "min": round(desc["min"], 2),
-            "max": round(desc["max"], 2),
-            "25%": round(desc["25%"], 2),
-            "50%": round(desc["50%"], 2),
-            "75%": round(desc["75%"], 2)
-        }
-        return return_dict
-        
+    """        
 
     df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
 
@@ -229,7 +245,7 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
     NUM_BINS = num_bins
     for node_info in tree_structure_dict:
         # 各ノードのヒストグラムを書くための条件を取得
-        feats = get_feat_to_root(node_info["node_number"])
+        feats = get_feat_to_root(node_info["node_number"], tree_structure_dict)
         # 大元のスキャンデータを読み込み
         tmp = df.copy()
         for feat in reversed(feats):
@@ -261,9 +277,13 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
             # x0とx1の範囲に収まるデータ数をカウントする
             cutting_bins["n_num"] = np.bincount(series.values, minlength=NUM_BINS)
         else:
+            # NUM_BINSの数でデータを区切る
             cutting_bins = pd.cut(series.values, NUM_BINS).value_counts().reset_index()
+            # 'x0'列に区切られたデータ範囲の小さい方を格納する
             cutting_bins["x0"] = cutting_bins["index"].map(get_left)
+            # 'x1'列に区切られたデータはんいの大きい方を格納する
             cutting_bins["x1"] = cutting_bins["index"].map(get_right)
+            # 'index'列を削除して、'0'列を'n_num'列にリネームする。
             cutting_bins = cutting_bins.drop(columns=["index"]).rename(columns={0:"n_num"}).reset_index(drop=False).rename(columns={"index":"hist_num"})
 
         cutting_bins["prob"] = cutting_bins["n_num"] / cutting_bins["n_num"].sum() * NUM_BINS / (cutting_bins["x1"].max() - cutting_bins["x0"].min())
@@ -277,7 +297,7 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         node_info["hist_describe"] = get_describe(series)
         node_info["outlier_describe"] = get_describe(outlier)
         
-    return add_dict
+    # return add_dict
 
 def tree_dump(clf, obj_var, num_bins, x, y):
     '''

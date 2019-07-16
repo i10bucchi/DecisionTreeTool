@@ -94,3 +94,16 @@ body {
 .bar:hover{
     fill:brown;
 }
+/* test */
+div.blocka {
+    float: left;
+    width: 50%;
+ }
+ .table th{
+     text-align: center;
+     width: 50px;
+ }
+ .table td{
+     text-align: center;
+     width: 50px;
+ }

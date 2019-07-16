@@ -179,7 +179,6 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
             series: 各データの目的変数の値が格納されたpandas.Series
         outpu:
             replaced_series: 外れ値が取り除かれたSeries
-            outlier_num: 外れ値の数
         """
         # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
         # 外れ値を除く処理を行わない
@@ -196,20 +195,31 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         
         # 外れ値の除去
         replaced_series = series[(min_outlier <= series) & (series <= max_outlier)]
+        outlier = series[~((min_outlier <= series) & (series <= max_outlier))]
         
-        return replaced_series
+        return replaced_series, outlier
 
-    def get_outlier_num(bef_series, aft_series):
+    def get_describe(series):
         """
         abst:
-            入力された2つのシリーズの行数の差を返す関数
+            シリーズの基本統計量を返す関数
         input:
-            bef_series: 外れ値を除去する前のシリーズ
-            aft_series: 外れ値を除去した後のシリーズ
+            series: pandasシリーズ
         output:
-            シリーズの行数の差
+            シリーズの基本統計量(辞書型)
         """
-        return bef_series.shape[0] - aft_series.shape[0]
+        desc = series.describe()
+        return_dict = {
+            "count": round(desc["count"], 2),
+            "mean": round(desc["mean"], 2),
+            "std": round(desc["std"], 2),
+            "min": round(desc["min"], 2),
+            "max": round(desc["max"], 2),
+            "25%": round(desc["25%"], 2),
+            "50%": round(desc["50%"], 2),
+            "75%": round(desc["75%"], 2)
+        }
+        return return_dict
         
 
     df = pd.concat([x.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
@@ -236,8 +246,7 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         def get_right(x):
             return x.right
         # cutメソッドを適用する前に外れ値がある場合は除く。
-        series = replace_outlier(tmp[obj_var])
-        num_outlier = get_outlier_num(tmp[obj_var], series)
+        series, outlier = replace_outlier(tmp[obj_var])
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
         # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
 
@@ -260,13 +269,15 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         cutting_bins["prob"] = cutting_bins["n_num"] / cutting_bins["n_num"].sum() * NUM_BINS / (cutting_bins["x1"].max() - cutting_bins["x0"].min())
 
 
+
         # 整形したDataFrameを辞書型に変換
         add_dict = cutting_bins.to_dict(orient="records")
 
         node_info["hist_data"] = add_dict
-        node_info["num_outlier"] = num_outlier
+        node_info["hist_describe"] = get_describe(series)
+        node_info["outlier_describe"] = get_describe(outlier)
         
-    return add_dict, num_outlier
+    return add_dict
 
 def tree_dump(clf, obj_var, num_bins, x, y):
     '''

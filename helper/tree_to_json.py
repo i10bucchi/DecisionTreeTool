@@ -186,8 +186,9 @@ def replace_outlier(series, bias=1.5):
     """
     # seriesのデータ数が5未満の場合は外れ値を取り除いてしまうとデータ数が少なくなりすぎてしまうため
     # 外れ値を除く処理を行わない
+    outlier = pd.Series([], name=series.name)
     if (series.shape[0] < 5):
-        return series
+        return series, outlier
 
     # 四分位数
     q1 = series.quantile(.25)
@@ -264,7 +265,6 @@ def get_histdata(tree_structure_dict, x, y, obj_var, num_bins):
         # cutメソッドを適用する前に外れ値がある場合は除く。
         series, outlier = replace_outlier(tmp[obj_var])
         # cutメソッドで指定のBIN数にデータを分割、その後列名の設定等々の処理を行う。
-        # cutting_bins = pd.cut(tmp[obj_var].values, NUM_BINS).value_counts().reset_index()
 
         if (series.unique().max() <= NUM_BINS and y.dtype == np.int64):
             series = series.astype(np.int64)

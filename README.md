@@ -111,3 +111,50 @@ _data.csv_
     - 収束の判断基準は, 対象ノードの分散が親ノードの分散の60%以下であることです.
     - 信頼性の判定基準は, 対象ノードのサンプル数が親ノードのサンプル数の10%以上であることです.
 - 各線をマウスオーバーすることで対象のノード情報を表示することができます.
+
+
+### Jupyter での使用
+
+Jupyter上でplot_tree_for_jupyterモジュールを呼び出すことで、jupyter上でも決定木のプロットが可能です。
+
+#### Example
+
+
+以下のようにhelperディレクトリから「plot_tree_for_jupyter」「data_manager」をインポートします。また、プロット用にHTMLメソッドもインポートしておきます。
+```python
+from helper import plot_tree_for_jupyter, data_manager
+from sklearn.tree import DecisionTreeRegressor
+from IPython.display import HTML
+```
+
+分析したいデータのcsvファイルパス、目的変数名、ダミー化したい変数名を以下のように定義すると、
+
+```python
+####### 定数宣言　#######
+# csvファイルのパス
+CSV_PATH = "./data/train.csv"
+# 目的変数名
+OBJ_VAL = "SalePrice"
+# ダミー化する変数名
+DUMMY_VAL = None          
+```
+
+data_managerモジュールのget_dataメソッドの呼び出し方は以下のようになります。このメソッドはデータの分割、ダミー化を行うものです。
+```python
+# 分析したい変数を目的変数と従属変数に分割
+x, y, X, Y = data_manager.get_data(CSV_PATH, OBJ_VAL, DUMMY_VAL)
+```
+
+sklearnの回帰決定木で分析を行い、
+
+```python
+# sklearn の回帰決定木で分析
+clf = regressor = DecisionTreeRegressor(max_depth=5)
+clf.fit(x, y)
+```
+その結果(変数clf)とx, y, 目的変数名、ヒストグラムのビン数をplot_tree_for_jupyterモジュールのplot_treeメソッドの引数として入れることで、結果のプロットが可能です。
+
+```python
+# 分析結果をプロット
+HTML(plot_tree_for_jupyter.plot_tree(x, y, clf, OBJ_VAL, BINS_NUM))
+```

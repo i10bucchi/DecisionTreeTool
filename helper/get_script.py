@@ -15,7 +15,7 @@ def get_html_for_jupyter():
     script += '<script>\n'
     script += 'require.config({\n'
     script += '  paths:{\n'
-    script += '    "d3": "js/d3"\n'
+    script += '    "d3": "../notebooks/js/d3"\n'
     script += '  }\n'
     script += '});\n'
     script += '</script>\n'
